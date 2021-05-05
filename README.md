@@ -17,3 +17,5 @@ Who made this?
 --------------
 
 Uli Kusterer of https://zathras.de and https://orangejuiceliberationfront.com
+
+![readme_screenshot.png](Screenshot of AppKitForClassic and CodeWarrior)

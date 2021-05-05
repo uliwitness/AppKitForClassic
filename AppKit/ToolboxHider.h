@@ -1,0 +1,1 @@
+void NSBeep(void);

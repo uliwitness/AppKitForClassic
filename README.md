@@ -18,4 +18,4 @@ Who made this?
 
 Uli Kusterer of https://zathras.de and https://orangejuiceliberationfront.com
 
-![https://github.com/uliwitness/AppKitForClassic/blob/main/readme_screenshot.png](Screenshot of AppKitForClassic and CodeWarrior)
+![Screenshot of AppKitForClassic and CodeWarrior in action](https://github.com/uliwitness/AppKitForClassic/blob/main/readme_screenshot.png)

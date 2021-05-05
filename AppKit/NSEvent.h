@@ -1,0 +1,1 @@
+#import "Foundation.h"#import "NSWindow.h"#include <Events.h>@class NSEvent;@interface NSEvent : NSObject{	EventRecord _macEvent;	NSWindow * _window;}-(id) initWithMacEvent: (EventRecord*)macEvent window: (NSWindow*)win;-(NSPoint) locationInWindow;@end

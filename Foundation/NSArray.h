@@ -1,0 +1,1 @@
+#import "Foundation.h"@class NSMutableArray;@interface NSMutableArray : NSObject{	unsigned _count;	id *_storage;}-(unsigned) count;-(void) addObject: (id)obj;-(id) objectAtIndex: (unsigned)idx;@end

@@ -1,6 +1,8 @@
 AppKitForClassic
 ================
 
+![Screenshot of AppKitForClassic and CodeWarrior in action](readme_screenshot.png)
+
 What is it?
 -----------
 
@@ -23,5 +25,3 @@ Who made this?
 --------------
 
 Uli Kusterer of https://zathras.de , https://orangejuiceliberationfront.com and https://hypercard.org
-
-![Screenshot of AppKitForClassic and CodeWarrior in action](readme_screenshot.png)

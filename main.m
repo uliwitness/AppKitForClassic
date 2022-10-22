@@ -59,10 +59,10 @@ int main( void )
 	NSApplication *app = [NSApplication sharedApplication];
 	NSObject<NSApplicationDelegate> *dele;
 	NSMenu * mainMenu = [[NSMenu alloc] initWithTitle: @"MAIN MENU"];
-	NSMenu * appleMenu = [[NSMenu alloc] initWithTitle: @""];
+	NSMenu * appleMenu = [[NSMenu alloc] initWithTitle: @""];
 	NSMenu * fileMenu = [[NSMenu alloc] initWithTitle: @"File"];
 	NSMenu * editMenu = [[NSMenu alloc] initWithTitle: @"Edit"];
-	NSMenuItem * appleMenuParentItem = [[NSMenuItem alloc] initWithTitle: @"-PARENT" target: nil action: NULL keyEquivalent: nil];
+	NSMenuItem * appleMenuParentItem = [[NSMenuItem alloc] initWithTitle: @"-PARENT" target: nil action: NULL keyEquivalent: nil];
 	NSMenuItem * fileMenuParentItem = [[NSMenuItem alloc] initWithTitle: @"FILE-PARENT" target: nil action: NULL keyEquivalent: nil];
 	NSMenuItem * editMenuParentItem = [[NSMenuItem alloc] initWithTitle: @"EDIT-PARENT" target: nil action: NULL keyEquivalent: nil];
 	NSMenuItem * aboutItem = [[NSMenuItem alloc] initWithTitle: @"About AppKitForClassic..." target: nil action: @selector(orderFrontStandardAboutPanel:) keyEquivalent: @"B"];

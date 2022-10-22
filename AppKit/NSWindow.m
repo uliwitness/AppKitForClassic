@@ -312,8 +312,6 @@ struct DialogItemsResource {
 	
 	[_contentView _mouseDown: event];
 }
-
-
 -(void) mouseUp: (NSEvent*)event
 {
 	if(!_hasWindow) {
@@ -321,8 +319,6 @@ struct DialogItemsResource {
 	}
 	//printf("Mouse released at %f,%f\n", [event locationInWindow].x, [event locationInWindow].y);
 }
-
-
 -(void) performClose: (id)sender
 {
 	if(!_hasWindow) {
@@ -332,24 +328,19 @@ struct DialogItemsResource {
 	CloseWindow( (GrafPtr)&_macWindow );
 	_hasWindow = NO;
 }
-
-
 -(NSView*) contentView
 {
 	return _contentView;
 }
-
 -(NSResponder*) firstResponder
 {
 	return _firstResponder;
 }
-
 -(BOOL) makeFirstResponder: (NSResponder*)responder
 {
 	if (_firstResponder == responder) {
 		return YES; // Nothing to do, you got what you want.
 	}
-
 	if (_firstResponder && ![_firstResponder resignFirstResponder] ) {
 		return NO;
 	}
@@ -362,7 +353,6 @@ struct DialogItemsResource {
 	_firstResponder = responder;
 	return YES;
 }
-
 -(GrafPtr) macGraphicsPort
 {
 	if(!_hasWindow) {
@@ -372,17 +362,12 @@ struct DialogItemsResource {
 	
 	return (GrafPtr) &_macWindow;
 }
-
-
 -(void) orderFrontStandardAboutPanel: (id)sender
 {
 	printf("Window About panel! WHOOO!\r");
 }
-
-
 +(NSWindow*)windowFromMacWindow: (WindowPtr)window
 {
 	return (NSWindow*) GetWRefCon(window);
 }
-
 @end

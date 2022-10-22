@@ -55,7 +55,7 @@ ResID gMenuIDSeed = 128;
 	BOOL addAppleMenuItems = NO;
 	if( _supermenu && [_supermenu supermenu] == nil ) { // Top-level menu.
 		InsertMenu(_macMenu, 0); // Append.
-		addAppleMenuItems = EqualString((**_macMenu).menuData, "\p", true, true);
+		addAppleMenuItems = EqualString((**_macMenu).menuData, "\p", true, true);
 	} else if( _supermenu ) {
 		InsertMenu(_macMenu, hierMenu);
 	} else { // "main" menu (i.e. menu bar).

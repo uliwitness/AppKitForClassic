@@ -1,4 +1,5 @@
 #include "Runtime.h"
+#include <Types.h>
 
 // ** NSSTRING IS A CLASS CLUSTER **
 // This means you will never get objects of type NSString, only of
@@ -16,9 +17,10 @@
 // NSObjects, even if they aren't.
 @interface NSString : NSObject
 
-+alloc;
++(id) alloc;
 -(id) initWithCString: (const char*)text;
 -(id) initWithCharacters: (const char*)text length: (unsigned)len;
+-(id) initWithStr255: (Str255)text;
 
 - (unsigned) length;
 - (const char *)cString;

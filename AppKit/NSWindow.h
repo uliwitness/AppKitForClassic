@@ -20,6 +20,7 @@
 }
 
 -(id) initWithFrame: (NSRect)box title: (NSString*)title;
+-(id) initWithDLOG: (short)dlogResID;
 
 -(NSColor*) backgroundColor;
 -(void) setBackgroundColor: (NSColor*)c;

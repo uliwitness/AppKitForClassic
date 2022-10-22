@@ -27,6 +27,8 @@ float NSMinY(NSRect box);
 float NSMidX(NSRect box);
 float NSMidY(NSRect box);
 
+NSRect NSInsetRect(float x, float y, NSRect box);
+
 Rect QDRectFromNSRect(NSRect box);
 NSRect NSRectFromQDRect(Rect box);
 

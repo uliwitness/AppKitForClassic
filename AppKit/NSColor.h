@@ -34,4 +34,6 @@
 +(NSColor*) lightGrayColor;
 +(NSColor*) darkGrayColor;
 
++(NSColor*) windowBackgroundColor;
+
 @end

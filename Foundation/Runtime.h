@@ -134,6 +134,9 @@ struct objc_method_description_list {
 - (BOOL) conformsTo:(Protocol *)protocol;
 @end
 
+extern Class objc_getClass(const char* name);
+extern void objc_registerClass(Class theClass);
+
 
 #if __cplusplus
 extern "C" {

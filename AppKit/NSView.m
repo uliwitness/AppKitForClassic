@@ -246,7 +246,7 @@
 
 -(void) mouseDown: (NSEvent*)event
 {
-	NSBeep();
+	//NSBeep();
 }
 
 -(BOOL) _mouseDown: (NSEvent*)event

@@ -52,7 +52,9 @@
 	GrafPtr oldPort;
 	Rect outerBox = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	Rect box = outerBox;
-	InsetRect( &box, 3, 3 );
+	if (_bezeled) {
+		InsetRect( &box, 4, 4 );
+	}
 	GetPort( &oldPort );
 	SetPort( [[self window] macGraphicsPort] );
 	SetOrigin( 0, 0 );
@@ -61,7 +63,18 @@
 	TEUpdate( &box, _macTextField );
 	
 	if (_bezeled) {
-		FrameRect( &outerBox );
+		Rect frameBox = outerBox;
+		[[NSColor whiteColor] setStroke];
+		MoveTo(outerBox.right - 1, outerBox.top + 1);
+		LineTo(outerBox.right - 1, outerBox.bottom - 1);
+		LineTo(outerBox.left, outerBox.bottom - 1);
+		[[NSColor grayColor] setStroke];
+		MoveTo(outerBox.left, outerBox.bottom - 1);
+		LineTo(outerBox.left, outerBox.top);
+		LineTo(outerBox.right - 1, outerBox.top);
+		InsetRect(&frameBox, 1, 1);
+		ForeColor(blackColor);
+		FrameRect(&frameBox);
 	}
 		
 	SetPort( oldPort );
@@ -76,7 +89,7 @@
 		unsigned len = [_stringValue length];
 		Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 		if (_bezeled) {
-			InsetRect( &box, 3, 3 );
+			InsetRect( &box, 4, 4 );
 		}
 		scrollableBox = box;
 		if (_bezeled) {
@@ -140,7 +153,7 @@
 		TECalText( _macTextField );
 		box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 		if (_bezeled) {
-			InsetRect( &box, 3, 3 );
+			InsetRect( &box, 4, 4 );
 		}
 		SetOrigin( 0, 0 );
 		TEUpdate( &box, _macTextField );
@@ -162,7 +175,7 @@
 		
 		box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 		if (_bezeled) {
-			InsetRect( &box, 3, 3 );
+			InsetRect( &box, 4, 4 );
 		}
 		(**_macTextField).destRect = box;
 		(**_macTextField).viewRect = box;
@@ -368,7 +381,7 @@
 -(void) setBezeled: (BOOL)state {
 	Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	if (_bezeled) {
-		InsetRect( &box, 3, 3 );
+		InsetRect( &box, 4, 4 );
 	}
 	(**_macTextField).destRect = box;
 	(**_macTextField).viewRect = box;

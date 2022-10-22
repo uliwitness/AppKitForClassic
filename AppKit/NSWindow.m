@@ -163,7 +163,7 @@ struct DialogItemsResource {
 					break;
 				
 				case 16:
-					tf = [[NSTextField alloc] initWithFrame: NSInsetRect(-3, -3, nsItemBox)];
+					tf = [[NSTextField alloc] initWithFrame: NSInsetRect(-4, -4, nsItemBox)];
 					[tf setBezeled: YES];
 					[tf setStringValue: text];
 					[_contentView addSubview: tf];

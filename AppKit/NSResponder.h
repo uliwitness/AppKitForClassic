@@ -17,6 +17,9 @@
 -(void) keyDown: (NSEvent*)event;
 -(void) keyUp: (NSEvent*)event;
 
+-(void) mouseEntered: (NSEvent*)event;
+-(void) mouseExited: (NSEvent*)event;
+
 -(void) noResponderFor: (SEL)eventSelector;
 
 -(BOOL) acceptsFirstResponder;

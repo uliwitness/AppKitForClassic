@@ -4,6 +4,7 @@
 #import "NSMenu.h"
 #import "NSMenuItem.h"
 #import "NSWindow.h"
+#import "NSView.h"
 #import "NSMenu.h"
 #include <Resources.h>
 #include <Menus.h>
@@ -77,7 +78,13 @@ NSApplication* NSApp = nil;
 	NSEvent *eventObject = nil;
 	RgnHandle mouseRgn = NULL;
 	Point mousePos;
+	NSPoint nsMouse;
+	NSView *mouseView = nil;
 	mouseRgn = NewRgn();
+	
+	// Make sure app starts with a mouse moved event:
+	GetMouse(&mousePos);
+	SetRectRgn(mouseRgn, mousePos.h + 10, mousePos.v + 10, mousePos.h + 11, mousePos.v + 11);
 
 	_isRunning = YES;
 	
@@ -91,8 +98,6 @@ NSApplication* NSApp = nil;
 		unsigned long nextFireTime = [NSTimer fireTimersAt: TickCount()];
 		[pool release];
 		pool = [[NSAutoreleasePool alloc] init];
-		GetMouse(&mousePos);
-		SetRectRgn(mouseRgn, mousePos.h, mousePos.v, mousePos.h + 1, mousePos.v + 1);
 	
 		if( !WaitNextEvent( everyEvent, &event, nextFireTime, mouseRgn ) ) {
 			continue;
@@ -146,7 +151,26 @@ NSApplication* NSApp = nil;
 					case mouseMovedMessage: {
 						NSEvent * eventObject;
 						eventObject = [[[NSEvent alloc] initWithMacEvent: &event window: nil] autorelease];
-						[self tryToPerform: @selector(mouseMoved:) withObject: eventObject];
+						part = FindWindow(event.where, &currentWindow);
+						if (part == inContent || part == inGrow) {
+							NSWindow * wd = [NSWindow windowFromMacWindow: currentWindow];
+							[gCurrentMouseView mouseExited: eventObject];
+							nsMouse = NSPointFromQDPoint(event.where);
+							mouseView = [wd _subviewAtPoint: nsMouse];
+							if (mouseView) {
+								gCurrentMouseView = mouseView;
+								[gCurrentMouseView mouseEntered: eventObject];
+								DisposeRgn(mouseRgn);
+								mouseRgn = [mouseView _globalRegion];
+								//SectRgn(mouseRgn, currentWindow->visRgn, mouseRgn);
+							} else {
+								SetRectRgn(mouseRgn, event.where.h, event.where.v, event.where.h + 1, event.where.v + 1);
+								SetCursor(&qd.arrow);
+							}
+						} else {
+							SetRectRgn(mouseRgn, event.where.h, event.where.v, event.where.h + 1, event.where.v + 1);
+							SetCursor(&qd.arrow);
+						}
 						break;
 					}
 				}

@@ -49,6 +49,24 @@
 	[self noResponderFor: _cmd];
 }
 
+-(void) mouseEntered: (NSEvent*)event {
+	if( _nextResponder ) {
+		[_nextResponder mouseEntered: event];
+		return;
+	}
+	
+	[self noResponderFor: _cmd];
+}
+
+-(void) mouseExited: (NSEvent*)event {
+	if( _nextResponder ) {
+		[_nextResponder mouseExited: event];
+		return;
+	}
+	
+	[self noResponderFor: _cmd];
+}
+
 -(void) noResponderFor: (SEL)eventSelector {
 	if( eventSelector == @selector(keyDown:) ) {
 		NSBeep();

@@ -4,7 +4,11 @@
 #import "NSEvent.h"
 #import "NSGraphicsContext.h"
 #import "ToolboxHider.h"
+#import "NSCursor.h"
 #include <Quickdraw.h>
+
+
+NSView* gCurrentMouseView = nil;
 
 
 @implementation NSView
@@ -22,6 +26,7 @@
 
 -(void) dealloc
 {
+	gCurrentMouseView = nil;
 	[_subviews release];
 	
 	[super dealloc];
@@ -249,6 +254,15 @@
 	//NSBeep();
 }
 
+-(void) mouseEntered: (NSEvent*)event {
+	[[NSCursor crosshairCursor] set];
+}
+
+-(void) mouseExited: (NSEvent*)event {
+
+}
+
+
 -(BOOL) _mouseDown: (NSEvent*)event
 {
 	int x, count = [_subviews count];
@@ -274,6 +288,43 @@
 	}
 	
 	return NO;
+}
+
+-(NSView*) _subviewAtPoint: (NSPoint)pos {
+	int x, count = [_subviews count];
+	NSRect box;
+
+	for( x = (count - 1); x >= 0; --x )
+	{
+		NSView * currentSubview = [_subviews objectAtIndex: x];
+		NSView * foundSubview = [currentSubview _subviewAtPoint: pos];
+		if (foundSubview) {
+			return foundSubview;
+		}
+	}
+	
+	pos = [self convertPoint: pos fromView: nil];
+	box = [self bounds];
+	
+	if( (pos.x >= box.origin.x) && (pos.y >= box.origin.y)
+		&& (pos.x <= (box.origin.x + box.size.width))
+		&& (pos.y <= (box.origin.y + box.size.height)) ) {
+		return self;
+	}
+	
+	return nil;
+}
+
+-(RgnHandle) _globalRegion {
+	RgnHandle result = NewRgn();
+	NSRect nsBox = [self convertRect: [self bounds] toView: nil];
+	NSPoint wdPos = [[self window] frame].origin;
+	Rect qdBox = {0};
+	nsBox.origin.x += wdPos.x;
+	nsBox.origin.y += wdPos.x;
+	qdBox = QDRectFromNSRect(nsBox);
+	RectRgn(result, &qdBox);
+	return result;
 }
 
 @end

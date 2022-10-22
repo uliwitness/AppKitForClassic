@@ -5,6 +5,9 @@
 @class NSWindow;
 @class NSColor;
 @class NSEvent;
+@class NSView;
+
+extern NSView* gCurrentMouseView;
 
 typedef enum _NSAutoresizingMaskOptions {
 	NSViewNotSizable = 0,
@@ -45,6 +48,8 @@ typedef enum _NSAutoresizingMaskOptions {
 -(void) viewDidMoveToWindow: (NSWindow*)wd;
 
 -(void) mouseDown: (NSEvent*)event;
+-(void) mouseEntered: (NSEvent*)event;
+-(void) mouseExited: (NSEvent*)event;
 
 -(NSPoint) convertPoint: (NSPoint)pos fromView: (NSView*)view;
 -(NSRect) convertRect: (NSRect)pos toView: (NSView*)view;
@@ -59,6 +64,8 @@ typedef enum _NSAutoresizingMaskOptions {
 -(void) _drawRect: (NSRect)dirtyRect withOffset: (NSPoint)pos;
 -(void) _viewDidMoveToWindow: (NSWindow*)wd;
 -(BOOL) _mouseDown: (NSEvent*)event;
+-(NSView*) _subviewAtPoint: (NSPoint)pos;
+-(RgnHandle) _globalRegion; // For mouse enter/exit.
 
 @end
 

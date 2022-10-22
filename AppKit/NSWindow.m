@@ -207,6 +207,13 @@ struct DialogItemsResource {
 	[_contentView setBackgroundColor: c];
 }
 
+-(NSRect) frame {
+	if(!_hasWindow) {
+		return NSMakeRect(0,0,0,0);
+	}
+	return NSRectFromQDRect(((GrafPtr)&_macWindow)->portRect);
+}
+
 -(void) draw
 {
 	NSGraphicsContext *newCtx;
@@ -315,6 +322,7 @@ struct DialogItemsResource {
 	
 	[_contentView _mouseDown: event];
 }
+
 -(void) mouseUp: (NSEvent*)event
 {
 	if(!_hasWindow) {
@@ -322,6 +330,7 @@ struct DialogItemsResource {
 	}
 	//printf("Mouse released at %f,%f\n", [event locationInWindow].x, [event locationInWindow].y);
 }
+
 -(void) performClose: (id)sender
 {
 	if(!_hasWindow) {
@@ -331,14 +340,17 @@ struct DialogItemsResource {
 	CloseWindow( (GrafPtr)&_macWindow );
 	_hasWindow = NO;
 }
+
 -(NSView*) contentView
 {
 	return _contentView;
 }
+
 -(NSResponder*) firstResponder
 {
 	return _firstResponder;
 }
+
 -(BOOL) makeFirstResponder: (NSResponder*)responder
 {
 	if (_firstResponder == responder) {
@@ -356,6 +368,7 @@ struct DialogItemsResource {
 	_firstResponder = responder;
 	return YES;
 }
+
 -(GrafPtr) macGraphicsPort
 {
 	if(!_hasWindow) {
@@ -365,12 +378,20 @@ struct DialogItemsResource {
 	
 	return (GrafPtr) &_macWindow;
 }
+
+-(NSView*) _subviewAtPoint: (NSPoint)pos {
+	pos = [self convertPoint: pos fromView: nil];
+	return [_contentView _subviewAtPoint: pos];
+}
+
 -(void) orderFrontStandardAboutPanel: (id)sender
 {
 	printf("Window About panel! WHOOO!\r");
 }
+
 +(NSWindow*)windowFromMacWindow: (WindowPtr)window
 {
 	return (NSWindow*) GetWRefCon(window);
 }
+
 @end

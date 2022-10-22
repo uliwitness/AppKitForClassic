@@ -34,6 +34,7 @@
 
 -(void) makeKeyAndOrderFront: (id)sender;
 -(void) setSize: (NSSize)newSize;
+-(NSRect) frame;
 
 -(NSView*) contentView;
 
@@ -41,6 +42,7 @@
 -(NSResponder*) firstResponder;
 
 // Private:
+-(NSView*) _subviewAtPoint: (NSPoint)pos;
 -(GrafPtr) macGraphicsPort;
 -(void) draw;
 -(void) activate;

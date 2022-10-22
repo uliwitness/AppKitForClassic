@@ -3,6 +3,7 @@
 #import "NSColor.h"
 #import "NSEvent.h"
 #import "NSMenuItem.h"
+#import "NSCursor.h"
 #include <string.h>
 
 @implementation NSTextField
@@ -45,6 +46,11 @@
 
 -(void) mouseUp: (NSEvent*)event
 {
+}
+
+-(void) mouseEntered: (NSEvent*)event
+{
+	[[NSCursor IBeamCursor] set];
 }
 
 -(void) drawRect: (NSRect)dirtyRect

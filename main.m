@@ -58,6 +58,8 @@ int main( void )
 	
 	NSApplication *app = [NSApplication sharedApplication];
 	NSObject<NSApplicationDelegate> *dele;
+	
+#if 0
 	NSMenu * mainMenu = [[NSMenu alloc] initWithTitle: @"MAIN MENU"];
 	NSMenu * appleMenu = [[NSMenu alloc] initWithTitle: @""];
 	NSMenu * fileMenu = [[NSMenu alloc] initWithTitle: @"File"];
@@ -91,6 +93,12 @@ int main( void )
 	[editMenu appendItem: deleteItem];
 	
 	[app performSelector: @selector(setMainMenu:) withObject: mainMenu];
+#else
+	NSMenu * mainMenu = [NSMenu menuFromMBAR: 128];
+	[mainMenu debugPrintWithIndent: 0];
+	[app setMainMenu: mainMenu];
+#endif
+	
 	dele = [[MyAppDelegate alloc] init];
 	
 	[app setDelegate: dele];

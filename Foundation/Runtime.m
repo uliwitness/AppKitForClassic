@@ -3,9 +3,19 @@
 #include <Memory.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
+
+// -----------------------------------------------------------------------------
+//	Binary-compatible refCon storage:
+//		These contortions are needed so class layout of NSConstantString that
+//		The MWObjC compiler creates on disk, which do not have space for a ref
+//		count.
+// -----------------------------------------------------------------------------
 
 unsigned short index_for_class(Class c);
 
+// Table of classes so we can store a small 16-bit index *and* the 16-bit ref count
+//	in one 32-bit isa "pointer".
 Class *gClasses = NULL;
 
 unsigned short index_for_class(Class c) {
@@ -25,7 +35,10 @@ unsigned short index_for_class(Class c) {
 	return x;
 }
 
-
+// Extract the actual class pointer from an 'isa', which might be an NSConstantString's actual isa pointer,
+// or a class created at runtime where alloc has already inserted an index and a refcount.
+// We use the low bit as a marker whether it's not a pointer, as all pointers allocated on MacOS are on even addresses,
+// so a real object pointer would never have its low bit set.
 #define ISA_TO_PTR(isa) ((((unsigned long)(isa)) & kRetainCountInISABit) ? gClasses[CLASS_INDEX_FROM_ISA(isa)] : (isa))
 
 static IMP find_method_implementation(id receiver,SEL sel)
@@ -93,7 +106,7 @@ static IMP find_super_implementation(objc_super *argsuper,SEL sel)
 
 @implementation NSObject
 
-+alloc
++(id) alloc
 {
 	NSObject*	newobj;
 
@@ -126,7 +139,7 @@ static IMP find_super_implementation(objc_super *argsuper,SEL sel)
 
 -(void)release
 {
-	if( ((unsigned long)isa) & kRetainCountInISABit ) {
+	if( ((unsigned long)isa) & kRetainCountInISABit ) { // Not a constant object that got a *real* pointer for its isa?
 		unsigned long rc = RETAINCOUNT_FROM_ISA(isa) - 1;
 		isa = (Class)(((unsigned long)isa & ~kRetainCountMask) | (rc << kRetainCountShift));
 		if( rc == 0 ) {
@@ -226,7 +239,8 @@ struct ClassNameEntry {
 struct ClassNameEntry *gClassNameTable = NULL;
 Size gClassNameTableCount = 0;
 
-
+// Look up a class's actual class object by its string name.
+// Class *must* have been registered via objc_registerClass() for this to work.
 Class objc_getClass(const char* name) {
 	int x = 0;
 	if (!gClassNameTable) return NULL;
@@ -238,6 +252,8 @@ Class objc_getClass(const char* name) {
 	return NULL;
 }
 
+// We don't know how to get at the real list of classes the MWObjC writes to the executable,
+// so we have this function to allow manually doing it.
 void objc_registerClass(Class theClass) {
 	if (!gClassNameTable) {
 		gClassNameTable = (struct ClassNameEntry*) NewPtr(sizeof(struct ClassNameEntry));

@@ -14,13 +14,18 @@
 	NSMutableArray *_itemArray;
 }
 
--(id) initWithTitle: (NSString*)macEvent;
++(NSMenu*) menuFromMBAR: (short)inMBARID;
+
+-(id) initWithTitle: (NSString*)title;
+-(id) initWithMENU: (short)menuID;
 
 -(NSMutableArray*) itemArray;
 -(void) appendItem: (NSMenuItem*)item;
 
 -(NSMenu*) supermenu;
 -(void) setSupermenu: (NSMenu*)parent;
+
+-(NSString*) title;
 
 // Private:
 -(void) install;

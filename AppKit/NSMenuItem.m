@@ -59,7 +59,7 @@
 {
 	NSMenu* oldChild = _submenu;
 	[oldChild setSupermenu: nil];
-	_submenu = child;
+	_submenu = [child retain];
 	[oldChild release];
 	
 	[_submenu setSupermenu: _menu];
@@ -109,7 +109,7 @@
 {
 	int x;
 	for( x = 0; x < indent; ++x) { printf("\t"); }
-	printf("NSMenuItem %p \"%s\" (menu: %p)\n", self, [_title cString], _menu);
+	printf("NSMenuItem %p \"%s\" (menu: %p submenu: %p)\n", self, [_title cString], _menu, _submenu);
 	[_submenu debugPrintWithIndent: indent + 1];
 }
 

@@ -1,5 +1,6 @@
 #import "NSMenu.h"
 #import "NSMenuItem.h"
+#import "NSByteStream.h"
 #include <Menus.h>
 #include <Resources.h>
 #include <stdio.h>
@@ -10,6 +11,26 @@ ResID gMenuIDSeed = 128;
 
 
 @implementation NSMenu
+
++(NSMenu*) menuFromMBAR: (short)inMBARID {
+	short **mbar = (short**) GetResource('MBAR', inMBARID);
+	short numMenus = (**mbar);
+	short *curID = (*mbar) + 1;
+	short x = 0;
+	
+	NSMenu * mainMenu = [[[NSMenu alloc] initWithTitle: @"MAIN-MENU"] autorelease];
+	
+	for (x = 0; x < numMenus; ++x) {
+		NSMenu * mnu = [[NSMenu alloc] initWithMENU: curID[x]];
+		NSMenuItem *parentItem = [[NSMenuItem alloc] initWithTitle: [mnu title] target: nil action: NULL keyEquivalent: nil];
+		[parentItem setSubmenu: mnu];
+		[mainMenu appendItem: parentItem];
+		[parentItem release];
+		[mnu release];
+	}
+	
+	return mainMenu;
+}
 
 -(id) initWithTitle: (NSString*)title
 {
@@ -23,6 +44,69 @@ ResID gMenuIDSeed = 128;
 	return self;
 }
 
+-(id) initWithMENU: (short)menuID {
+	self = [super init];
+	if( self ) {
+		NSByteStream *stream = [[NSByteStream alloc] initWithResource: GetResource('MENU', menuID)];
+		short menuID = [stream readSInt16];
+		short mdefID = 0;
+		UInt32 enableFlags = 0;
+		Str255 menuTitle = {0};
+		printf("menu ID = %d\n", menuID);
+		[stream skip: 4];
+		mdefID = [stream readSInt16];
+		printf("mdef ID = %d\n", mdefID);
+		[stream skip: 2];
+		enableFlags = [stream readUInt32];
+		printf("enableFlags = %lu\n", enableFlags);
+		[stream readStr255: menuTitle];
+		printf("menuTitle = %s\n", menuTitle + 1);
+		_title = [[NSString alloc] initWithStr255: menuTitle];
+		if (gMenuIDSeed == menuID) {
+			++gMenuIDSeed;
+			printf("Adjusting gMenuIDSeed to %d\n", gMenuIDSeed);
+		}
+		_macMenu = NewMenu(menuID, menuTitle);
+		_itemArray = [[NSMutableArray alloc] init];
+		while ([stream bytesLeft] > 1) {
+			Str255 itemTitle = {0};
+			NSString *titleObject = nil;
+			char cmdKey = 0;
+			SInt8 markChar = 0;
+			NSString *cmdKeyObject = nil;
+			NSMenuItem *item = nil;
+			NSRange actionMarkerRange = {NSNotFound, 0};
+			SEL action = NULL;
+			NSString *selString = nil;
+			[stream readStr255: itemTitle];
+			printf("%s:\n", itemTitle + 1);
+			titleObject = [[NSString alloc] initWithStr255: itemTitle];
+			[stream skip: 1];
+			cmdKey = [stream readUInt8];
+			printf("\tcmdKey = %d\n", (int)cmdKey);
+			markChar = [stream readSInt8];
+			printf("\tmarkChar = %d\n", (int)markChar);
+			[stream skip: 1]; // style.
+			cmdKeyObject = [[NSString alloc] initWithCharacters: &cmdKey length: cmdKey ? 1 : 0];
+			actionMarkerRange = [titleObject rangeOfString: @"\\\\"];
+			if (actionMarkerRange.location != NSNotFound) {
+				selString = [titleObject substringFromIndex: NSMaxRange(actionMarkerRange)];
+				action = NSSelectorFromString(selString);
+				titleObject = [titleObject substringToIndex: actionMarkerRange.location];
+			}
+			item = [[NSMenuItem alloc] initWithTitle: titleObject target: nil action: action keyEquivalent: cmdKeyObject];
+			[titleObject release];
+			[cmdKeyObject release];
+			[self appendItem: item];
+			[item setMenu: self];
+			[item release];
+		}
+		[stream release];
+	}
+	
+	return self;
+}
+
 -(void) dealloc
 {
 	[_title release];
@@ -30,6 +114,14 @@ ResID gMenuIDSeed = 128;
 	[_itemArray release];
 	
 	[super dealloc];
+}
+
+-(NSString*) title {
+	NSString * title = nil;
+	HLock((Handle)_macMenu);
+	title = [[[NSString alloc] initWithStr255: (**_macMenu).menuData] autorelease];
+	HUnlock((Handle)_macMenu);
+	return title;
 }
 
 -(NSMutableArray*) itemArray

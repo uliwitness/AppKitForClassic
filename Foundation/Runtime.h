@@ -29,6 +29,8 @@
 #define ISA_FOR_INDEX_AND_REFCOUNT(idx, rc)	((void*)(kRetainCountInISABit | (((unsigned long)idx) << kClassIndexShift) | (((unsigned long)rc) << kRetainCountShift)))
 //	typedefs
 
+#define NSSelectorFromString(objCStr) ((SEL)[objCStr cString])
+
 @class Protocol;
 
 typedef struct objc_class *Class;

@@ -52,7 +52,7 @@
 	GrafPtr oldPort;
 	Rect outerBox = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	Rect box = outerBox;
-	InsetRect( &box, 5, 5 );
+	InsetRect( &box, 3, 3 );
 	GetPort( &oldPort );
 	SetPort( [[self window] macGraphicsPort] );
 	SetOrigin( 0, 0 );
@@ -72,10 +72,11 @@
 	if( !_macTextField ) {
 		Rect scrollableBox;
 		GrafPtr oldPort;
+		TextStyle styleRec = {0};
 		unsigned len = [_stringValue length];
 		Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 		if (_bezeled) {
-			InsetRect( &box, 5, 5 );
+			InsetRect( &box, 3, 3 );
 		}
 		scrollableBox = box;
 		if (_bezeled) {
@@ -86,12 +87,19 @@
 		SetPort( [[self window] macGraphicsPort] );
 		
 		_macTextField = TENew( &scrollableBox, &box );
+		(**_macTextField).txFont = 0;
+		(**_macTextField).txFace = normal;
+		(**_macTextField).txSize = 12;
 		TEFeatureFlag(teFUseWhiteBackground, teBitClear, _macTextField);
 		TEFeatureFlag(teFAutoScroll, teBitSet, _macTextField);
 		if (_bezeled) {
 			TEFeatureFlag(teFOutlineHilite, teBitSet, _macTextField);
 		}
+		styleRec.tsFont = systemFont;
+		styleRec.tsFace = normal;
+		styleRec.tsSize = 12;
 		
+		TESetStyle(doFont, &styleRec, false, _macTextField);
 		TESetText( [_stringValue cString], len, _macTextField );
 		TECalText( _macTextField );
 		
@@ -118,15 +126,21 @@
 		Rect box;
 		unsigned len;
 		GrafPtr oldPort;
+		TextStyle styleRec = {0};
 		GetPort( &oldPort );
 		SetPort( [[self window] macGraphicsPort] );
 		
 		len = [_stringValue length];
 		TESetText( [_stringValue cString], len, _macTextField );
+		styleRec.tsFont = systemFont;
+		styleRec.tsFace = normal;
+		styleRec.tsSize = 12;
+		
+		TESetStyle(doFont, &styleRec, false, _macTextField);
 		TECalText( _macTextField );
 		box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 		if (_bezeled) {
-			InsetRect( &box, 5, 5 );
+			InsetRect( &box, 3, 3 );
 		}
 		SetOrigin( 0, 0 );
 		TEUpdate( &box, _macTextField );
@@ -148,7 +162,7 @@
 		
 		box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 		if (_bezeled) {
-			InsetRect( &box, 5, 5 );
+			InsetRect( &box, 3, 3 );
 		}
 		(**_macTextField).destRect = box;
 		(**_macTextField).viewRect = box;
@@ -354,7 +368,7 @@
 -(void) setBezeled: (BOOL)state {
 	Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	if (_bezeled) {
-		InsetRect( &box, 5, 5 );
+		InsetRect( &box, 3, 3 );
 	}
 	(**_macTextField).destRect = box;
 	(**_macTextField).viewRect = box;

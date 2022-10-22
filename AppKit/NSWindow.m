@@ -6,6 +6,7 @@
 #import "NSTextField.h"
 #import "NSButton.h"
 #import "NSByteStream.h"
+#import "NSApplication.h"
 #import "Runtime.h"
 #import <MacWindows.h>
 #import <stdio.h>
@@ -59,6 +60,7 @@ struct DialogItemsResource {
         [_contentView setBackgroundColor: [NSColor windowBackgroundColor]];
         [_contentView setWindow: self];
         _hasWindow = YES;
+        _nextResponder = [NSApplication sharedApplication];
 	}
 	
 	return self;
@@ -107,6 +109,7 @@ struct DialogItemsResource {
 	   	_contentView = [[NSWindowContentView alloc] initWithFrame: nsBox];
 	   	[_contentView setBackgroundColor: [NSColor windowBackgroundColor]];
 		[_contentView setWindow: self];
+        _nextResponder = [NSApplication sharedApplication];
 		
 		// Now load DITL and create its views:
 		ditl = GetResource('DITL', ditlResID);
@@ -160,7 +163,7 @@ struct DialogItemsResource {
 					break;
 				
 				case 16:
-					tf = [[NSTextField alloc] initWithFrame: NSInsetRect(-4, -4, nsItemBox)];
+					tf = [[NSTextField alloc] initWithFrame: NSInsetRect(-3, -3, nsItemBox)];
 					[tf setBezeled: YES];
 					[tf setStringValue: text];
 					[_contentView addSubview: tf];

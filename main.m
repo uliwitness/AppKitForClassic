@@ -100,6 +100,8 @@ int main( void )
 	[app setMainMenu: mainMenu];
 #endif
 	
+	objc_registerClass([NSProgressIndicator class]);
+
 	dele = [[MyAppDelegate alloc] init];
 	
 	[app setDelegate: dele];

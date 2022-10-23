@@ -8,6 +8,7 @@
 #import "NSByteStream.h"
 #import "NSApplication.h"
 #import "Runtime.h"
+#import "NSDefaultButtonOutline.h"
 #import <MacWindows.h>
 #import <stdio.h>
 #import <Resources.h>
@@ -86,6 +87,7 @@ struct DialogItemsResource {
 		Handle ditl = NULL;
 		short numItems = 0;
 		short x = 0;
+		Rect defaultOutlineBox = {0,0,0,0};
 		
 		[stream readRect: &qdBox];
 		nsBox = NSRectFromQDRect(qdBox);
@@ -166,9 +168,33 @@ struct DialogItemsResource {
 			text = [[NSString alloc] initWithStr255: itemText];
 			
 			switch (itemType) {
-				case 4:
+				case 4: {
+					BOOL isDefault = defaultOutlineBox.left < itemBox.left
+						&& defaultOutlineBox.top < itemBox.top
+						&& defaultOutlineBox.right > itemBox.right
+						&& defaultOutlineBox.bottom > itemBox.bottom;
 					bt = [[NSButton alloc] initWithFrame: nsItemBox];
 					[bt setTitle: text];
+					if (isDefault) {
+						[bt setKeyEquivalent: @"\r"];
+					}
+					[_contentView addSubview: bt];
+					[bt release];
+					break;
+				}
+				
+				case 5:
+					bt = [[NSButton alloc] initWithFrame: nsItemBox];
+					[bt setTitle: text];
+					[bt setButtonType: NSButtonTypeSwitch];
+					[_contentView addSubview: bt];
+					[bt release];
+					break;
+				
+				case 6:
+					bt = [[NSButton alloc] initWithFrame: nsItemBox];
+					[bt setTitle: text];
+					[bt setButtonType: NSButtonTypeRadio];
 					[_contentView addSubview: bt];
 					[bt release];
 					break;
@@ -180,8 +206,14 @@ struct DialogItemsResource {
 						BlockMoveData(itemText + 3, className, itemText[0] - 2);
 						className[itemText[0] - 2] = 0;
 						theClass = objc_getClass(className);
+						if (theClass == [NSDefaultButtonOutline class]) {
+							defaultOutlineBox = itemBox;
+						}
 						vw = [[theClass alloc] initWithFrame: nsItemBox];
 						[_contentView addSubview: vw];
+						if (!_firstResponder && [vw acceptsFirstResponder]) {
+							_firstResponder = vw;
+						}
 						[vw release];
 					} else {
 						tf = [[NSTextField alloc] initWithFrame: nsItemBox];
@@ -196,6 +228,9 @@ struct DialogItemsResource {
 					[tf setBezeled: YES];
 					[tf setStringValue: text];
 					[_contentView addSubview: tf];
+					if (!_firstResponder) {
+						_firstResponder = tf;
+					}
 					[tf release];
 					break;
 				
@@ -209,6 +244,9 @@ struct DialogItemsResource {
 		}
 		[stream release];
 		
+		if (_firstResponder) {
+			[_firstResponder becomeFirstResponder];
+		}
    }
    
    return self;

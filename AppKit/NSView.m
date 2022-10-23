@@ -37,7 +37,7 @@ NSView* gCurrentMouseView = nil;
 
 -(NSColor*) backgroundColor
 {
-	return [NSColor orangeColor];
+	return [NSColor windowBackgroundColor];
 }
 
 -(void) drawRect: (NSRect)dirtyRect

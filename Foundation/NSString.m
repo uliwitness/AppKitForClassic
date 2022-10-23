@@ -42,6 +42,10 @@
 	return "";
 }
 
+-(BOOL) isEqualToString: (NSString*)str {
+	return strcmp([self cString], [str cString]) == 0;
+}
+
 - (NSRange) rangeOfString: (NSString*)pattern {
 	const char* subject = [self cString];
 	const char* found = strstr(subject, [pattern cString]);

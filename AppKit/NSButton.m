@@ -6,7 +6,11 @@
 #import "NSApplication.h"
 //#include <ControlDefinitions.h>
 #define pushButProc 0
+#define checkBoxProc 1
+#define radioButProc 2
 #define inButton 10
+#define inCheckBox 11
+#define kControlPushButtonDefaultTag FOUR_CHAR_CODE('dflt') 
 
 @implementation NSButton
 
@@ -15,6 +19,7 @@
 	if( _macControl ) {
 		DisposeControl(_macControl);
 	}
+	[_shortcut release];
 	
 	[super dealloc];
 }
@@ -26,14 +31,18 @@
 
 -(void) mouseDown: (NSEvent*)event
 {
+	short part;
 	Rect box;
 	GrafPtr oldPort;
 	GetPort( &oldPort );
 	SetPort( [[self window] macGraphicsPort] );
+	[[self backgroundColor] setFill];
 	box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	MoveControl( _macControl, box.left, box.top );
 	SizeControl( _macControl, box.right - box.left, box.bottom - box.top );
-	if( inButton == TrackControl( _macControl, [event macEvent].where, NULL ) ) {
+	part = TrackControl(_macControl, [event macEvent].where, NULL);
+	if (part == inButton || part == inCheckBox) {
+		[self setNextState];
 		[[NSApplication sharedApplication] sendAction: _action to: _target from: self];
 	}
 	SetPort( oldPort );
@@ -48,9 +57,22 @@
 	[[NSCursor pointingHandCursor] set];
 }
 
+-(void) setNextState {
+	NSControlState state = [self state];
+	
+	if (_type == NSButtonTypeRadio) {
+		[self setState: NSOnState];
+	} else if (state == NSOnState) {
+		[self setState: NSOffState];
+	} else if (state == NSOffState) {
+		[self setState: NSOnState];
+	}
+}
+
 -(void) drawRect: (NSRect)dirtyRect
 {
 	Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
+	[[self backgroundColor] setFill];
 	SetOrigin( 0, 0 );
 	MoveControl( _macControl, box.left, box.top );
 	SizeControl( _macControl, box.right - box.left, box.bottom - box.top );
@@ -59,17 +81,35 @@
 
 -(void) viewDidMoveToWindow: (NSWindow*)wd
 {
-	if( !_macControl ) {
-		Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
+	if (!_macControl) {
+		Rect box;
+		Boolean isDefault = [_shortcut isEqualToString: @"\r"];
+		short cdef = pushButProc;
+		switch (_type) {
+			case NSButtonTypeMomentaryPushIn:
+				cdef = pushButProc;
+				break;
+			case NSButtonTypeSwitch:
+				cdef = checkBoxProc;
+				break;
+			case NSButtonTypeRadio:
+				cdef = radioButProc;
+				break;
+		}
+		
+		box = QDRectFromNSRect([self convertRect: [self bounds] toView: nil]);
 		_macControl = newcontrol( [wd macGraphicsPort],
 									&box,
 									[_title cString],
 									true,
 									0,
 									0,
-									0,
-									pushButProc,
-									(long)self );
+									1,
+									cdef,
+									(long)self);
+									
+		SetControlData(_macControl, kControlEntireControl, kControlPushButtonDefaultTag,
+						sizeof(Boolean), &isDefault);
 	}
 }
 
@@ -103,6 +143,60 @@
 -(SEL) action
 {
 	return _action;
+}
+
+-(void) setButtonType: (NSButtonType)type {
+	_type = type;
+	
+	if ([self window] != nil) {
+		if (_macControl) {
+			DisposeControl(_macControl);
+		}
+		_macControl = NULL;
+		[self viewDidMoveToWindow: [self window]];
+		[self setNeedsDisplay: YES];
+	}
+}
+
+-(void) setState: (NSControlState)state {
+	if (_type == NSButtonTypeSwitch || _type == NSButtonTypeRadio) {
+		if (state == NSOnState) {
+			SetControlValue(_macControl, 1);
+		} else if (state == NSOffState) {
+			SetControlValue(_macControl, 0);
+		}
+	}
+	[self setNeedsDisplay: YES];
+}
+
+-(NSControlState) state {
+	if (_type == NSButtonTypeSwitch || _type == NSButtonTypeRadio) {
+		SInt16 value = GetControlValue(_macControl);
+		if (value == 1) {
+			return NSOnState;
+		} else if (value == 0) {
+			return NSOffState;
+		}
+		
+		return NSOffState;
+	}
+	
+	return NSOffState;
+}
+
+-(void) setKeyEquivalent: (NSString*)shortcut {
+	NSString *oldVal = _shortcut;
+	_shortcut = [shortcut retain];
+	[oldVal release];
+	
+	if ([self window] != nil) {
+		if (_macControl) {
+			DisposeControl(_macControl);
+		}
+		_macControl = NULL;
+		[self viewDidMoveToWindow: [self window]];
+		[self setNeedsDisplay: YES];
+	}
 }
 
 @end

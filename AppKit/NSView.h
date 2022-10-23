@@ -70,6 +70,8 @@ typedef enum _NSAutoresizingMaskOptions {
 -(void) setNeedsDisplay: (BOOL)state;
 -(void) setNeedsDisplayInRect: (NSRect)box;
 
+-(void) loadSubviewsFromDITL: (short)ditlResID firstResponder: (NSResponder**)outResponder;
+
 // Private:
 -(NSColor*) backgroundColor;
 -(void) _drawRect: (NSRect)dirtyRect withOffset: (NSPoint)pos;

@@ -3,12 +3,9 @@
 #import "NSView.h"
 #import "NSColor.h"
 #import "NSGraphicsContext.h"
-#import "NSTextField.h"
-#import "NSButton.h"
 #import "NSByteStream.h"
 #import "NSApplication.h"
-#import "Runtime.h"
-#import "NSDefaultButtonOutline.h"
+#import "NSView+DITLLoading.h"
 #import <MacWindows.h>
 #import <stdio.h>
 #import <Resources.h>
@@ -87,7 +84,6 @@ struct DialogItemsResource {
 		Handle ditl = NULL;
 		short numItems = 0;
 		short x = 0;
-		Rect defaultOutlineBox = {0,0,0,0};
 		
 		[stream readRect: &qdBox];
 		nsBox = NSRectFromQDRect(qdBox);
@@ -143,106 +139,7 @@ struct DialogItemsResource {
         _nextResponder = [NSApplication sharedApplication];
 		
 		// Now load DITL and create its views:
-		ditl = GetResource('DITL', ditlResID);
-		stream = [[NSByteStream alloc] initWithResource: ditl];
-		numItems = [stream readUInt16];
-		for (x = 0; x <= numItems; ++x) {
-			Rect	itemBox = {0};
-			UInt8	itemType = 0;
-			Str255	itemText = {0};
-			NSRect	nsItemBox = {0};
-			NSTextField * tf = nil;
-			NSView * vw = nil;
-			NSButton * bt = nil;
-			NSString * text = nil;
-			Boolean isEnabled = false;
-			
-			[stream skip: sizeof(UInt32)];
-			[stream readRect: &itemBox];
-			itemType = [stream readUInt8];
-			isEnabled = (itemType & 0x80) != 0;
-			itemType &= ~0x80;
-			[stream readStr255: itemText];
-			[stream alignOn: 2];
-			nsItemBox = NSRectFromQDRect(itemBox);
-			text = [[NSString alloc] initWithStr255: itemText];
-			
-			switch (itemType) {
-				case 4: {
-					BOOL isDefault = defaultOutlineBox.left < itemBox.left
-						&& defaultOutlineBox.top < itemBox.top
-						&& defaultOutlineBox.right > itemBox.right
-						&& defaultOutlineBox.bottom > itemBox.bottom;
-					bt = [[NSButton alloc] initWithFrame: nsItemBox];
-					[bt setTitle: text];
-					if (isDefault) {
-						[bt setKeyEquivalent: @"\r"];
-					}
-					[_contentView addSubview: bt];
-					[bt release];
-					break;
-				}
-				
-				case 5:
-					bt = [[NSButton alloc] initWithFrame: nsItemBox];
-					[bt setTitle: text];
-					[bt setButtonType: NSButtonTypeSwitch];
-					[_contentView addSubview: bt];
-					[bt release];
-					break;
-				
-				case 6:
-					bt = [[NSButton alloc] initWithFrame: nsItemBox];
-					[bt setTitle: text];
-					[bt setButtonType: NSButtonTypeRadio];
-					[_contentView addSubview: bt];
-					[bt release];
-					break;
-				
-				case 8:
-					if ((itemText[0] > 2) && (itemText[1] == '\\') && (itemText[2] == '\\')) {
-						char className[256];
-						Class theClass;
-						BlockMoveData(itemText + 3, className, itemText[0] - 2);
-						className[itemText[0] - 2] = 0;
-						theClass = objc_getClass(className);
-						if (theClass == [NSDefaultButtonOutline class]) {
-							defaultOutlineBox = itemBox;
-						}
-						vw = [[theClass alloc] initWithFrame: nsItemBox];
-						[_contentView addSubview: vw];
-						if (!_firstResponder && [vw acceptsFirstResponder]) {
-							_firstResponder = vw;
-						}
-						[vw release];
-					} else {
-						tf = [[NSTextField alloc] initWithFrame: nsItemBox];
-						[tf setStringValue: text];
-						[_contentView addSubview: tf];
-						[tf release];
-					}
-					break;
-				
-				case 16:
-					tf = [[NSTextField alloc] initWithFrame: NSInsetRect(-4, -4, nsItemBox)];
-					[tf setBezeled: YES];
-					[tf setStringValue: text];
-					[_contentView addSubview: tf];
-					if (!_firstResponder) {
-						_firstResponder = tf;
-					}
-					[tf release];
-					break;
-				
-				default:
-					vw = [[NSView alloc] initWithFrame: nsItemBox];
-					[_contentView addSubview: vw];
-					[vw release];
-					break;
-			}
-			[text release];	
-		}
-		[stream release];
+		[_contentView loadSubviewsFromDITL: ditlResID firstResponder: &_firstResponder];
 		
 		if (_firstResponder) {
 			[_firstResponder becomeFirstResponder];

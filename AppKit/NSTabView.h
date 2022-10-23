@@ -14,12 +14,16 @@
 @interface NSTabViewItem : NSObject
 {
 	NSString *_label;
+	NSString *_identifier;
 	NSView *_view;
 	NSRect _tabBox;
 }
 
 -(void) setLabel: (NSString*)label;
 -(NSString*) label;
+
+-(void) setIdentifier: (NSString*)identifier;
+-(NSString*) identifier;
 
 -(void) setView: (NSView*)view;
 -(NSView*) view;
@@ -38,6 +42,7 @@
 }
 
 -(void) addTabViewItem: (NSTabViewItem*)anItem;
+-(NSTabViewItem*) tabViewItemAtIndex: (unsigned)idx;
 
 -(void) setDelegate: (id)dele;
 -(id) delegate;

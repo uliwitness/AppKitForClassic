@@ -12,19 +12,27 @@
 #define TAB_V_INNER_PADDING 	3
 #define CONTENT_INNER_PADDING	4
 
+@interface NSTabItemView : NSView
+{
+	NSColor *_backgroundColor;
+}
+
+@end
+
 @implementation NSTabViewItem
 
 -(id) init {
 	self = [super init];
 	if (self) {
 		_label = @"Title";
-		_view = [[NSView alloc] init];
+		_view = [[NSTabItemView alloc] init];
 	}
 	return self;
 }
 
 -(void) dealloc {
 	[_label release];
+	[_identifier release];
 	[_view release];
 	
 	[super dealloc];
@@ -39,6 +47,17 @@
 -(NSString*) label {
 	return _label;
 }
+
+-(void) setIdentifier: (NSString*)identifier {
+	NSString *oldIdentifier = _identifier;
+	_identifier = [identifier retain];
+	[oldIdentifier release];
+}
+
+-(NSString*) identifier {
+	return _identifier;
+}
+
 
 -(void) setView: (NSView*)view {
 	NSView *oldView = _view;
@@ -65,28 +84,7 @@
 -(id) initWithFrame: (NSRect)frame {
 	self = [super initWithFrame: frame];
 	if (self) {
-		float tabHeight = 0;
-		NSRect tabsArea, contentArea;
-		NSTabViewItem *item = [[NSTabViewItem alloc] init];
 		_tabViewItems = [[NSMutableArray alloc] init];
-		[item setLabel: @"First Tab"];
-		[_tabViewItems addObject: item];
-		_selectedTabViewItem = item;
-		[self addSubview: [item view]];
-		[item release];
-		item = [[NSTabViewItem alloc] init];
-		[item setLabel: @"Second Tab"];
-		[_tabViewItems addObject: item];
-		[self addSubview: [item view]];
-		[item release];
-
-		[self layoutTabs];
-		
-		tabHeight = [[_tabViewItems objectAtIndex: 0] tabBox].size.height;
-		NSDivideRect([self bounds], &tabsArea, &contentArea, tabHeight, NSMinYEdge);
-		contentArea = NSInsetRect(CONTENT_INNER_PADDING, CONTENT_INNER_PADDING, contentArea);
-		[[[_tabViewItems objectAtIndex: 0] view] setFrame: contentArea];
-		[[[_tabViewItems objectAtIndex: 1] view] setFrame: contentArea];
 	}
 	return self;
 }
@@ -109,6 +107,10 @@
 	}
 	[[anItem view] setHidden: (anItem != _selectedTabViewItem)];
 	[self layoutTabs];
+}
+
+-(NSTabViewItem*) tabViewItemAtIndex: (unsigned)idx {
+	return [_tabViewItems objectAtIndex: idx];
 }
 
 -(void) setDelegate: (id)dele {
@@ -148,6 +150,7 @@ static void DrawTab(Rect *currentTab) {
 	tabHeight = fontInfo.leading + fontInfo.ascent + fontInfo.descent + (TAB_V_INNER_PADDING * 2);
 	
 	NSDivideRect([self bounds], &tabsArea, &contentArea, tabHeight, NSMinYEdge);
+	contentArea = NSInsetRect(CONTENT_INNER_PADDING, CONTENT_INNER_PADDING, contentArea);
 	currentTab = QDRectFromNSRect(tabsArea);
 	currentTab.left += TAB_H_OUTER_PADDING;
 	currentTab.right = currentTab.left;
@@ -160,6 +163,7 @@ static void DrawTab(Rect *currentTab) {
 		currentTab.right += TAB_H_INNER_PADDING * 2;
 		
 		[currentItem setTabBox: NSRectFromQDRect(currentTab)];
+		[[currentItem view] setFrame: contentArea];
 		
 		currentTab.left = currentTab.right;
 	}
@@ -249,10 +253,12 @@ static void DrawTab(Rect *currentTab) {
 	}
 }
 
--(void) setFrame: (NSRect)box {
+-(void) setFrame: (NSRect)box {	
 	float tabHeight = 0;
 	NSRect tabsArea, contentArea;
 	int x = 0, count = [_tabViewItems count];
+
+	[super setFrame: box];
 
 	tabHeight = [[_tabViewItems objectAtIndex: 0] tabBox].size.height;
 	NSDivideRect([self bounds], &tabsArea, &contentArea, tabHeight, NSMinYEdge);
@@ -263,6 +269,37 @@ static void DrawTab(Rect *currentTab) {
 		
 		[[currentItem view] setFrame: contentArea];
 	}
+}
+
+@end
+
+
+static int sCurrentColor = 0;
+static NSColor * sColors[4] = {
+	nil,
+	nil,
+	nil,
+	nil
+};
+
+
+@implementation NSTabItemView
+
+-(NSColor*) backgroundColor {
+	if (!_backgroundColor) {
+		if (sColors[0] == nil) {
+			sColors[0] = [NSColor cyanColor];
+			sColors[1] = [NSColor orangeColor];
+			sColors[2] = [NSColor redColor];
+			sColors[3] = [NSColor blueColor];
+		}
+		_backgroundColor = sColors[sCurrentColor];
+		++sCurrentColor;
+		if (sCurrentColor >= 4) {
+			sCurrentColor = 0;
+		}
+	}
+	return _backgroundColor;
 }
 
 @end

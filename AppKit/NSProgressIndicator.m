@@ -50,7 +50,7 @@
 		double percentage = _doubleValue - _minValue;
 		percentage /= _maxValue - _minValue;
 		
-		trackBox.bottom = trackBox.top + 16;
+		trackBox.bottom = trackBox.top + 14;
 		
 		filledBox = trackBox;
 		

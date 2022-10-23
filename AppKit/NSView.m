@@ -5,8 +5,17 @@
 #import "NSGraphicsContext.h"
 #import "ToolboxHider.h"
 #import "NSCursor.h"
+#import "Runtime.h"
+#import "NSDefaultButtonOutline.h"
+#import "NSProgressIndicator.h"
+#import "NSTabView.h"
+#import "NSTextField.h"
+#import "NSByteStream.h"
+#import "NSTextField.h"
+#import "NSButton.h"
 #include <Quickdraw.h>
 #include <Balloons.h>
+#include <Resources.h>
 #include <stdio.h>
 
 
@@ -103,6 +112,193 @@ NSView* gCurrentMouseView = nil;
 	InvalRect(&qdBox);
 	
 	SetPort(oldPort);
+}
+
+-(void) loadSubviewsFromDITL: (short)ditlResID firstResponder: (NSResponder**)outResponder {
+	Rect defaultOutlineBox = {0,0,0,0};
+	Handle ditl = GetResource('DITL', ditlResID);
+	NSByteStream *stream = [[NSByteStream alloc] initWithResource: ditl];
+	short x = 0, numItems = [stream readUInt16];
+	for (x = 0; x <= numItems; ++x) {
+		Rect	itemBox = {0};
+		UInt8	itemType = 0;
+		Str255	itemText = {0};
+		NSRect	nsItemBox = {0};
+		NSTextField * tf = nil;
+		NSView * vw = nil;
+		NSButton * bt = nil;
+		NSString * text = nil;
+		Boolean isEnabled = false;
+		
+		[stream skip: sizeof(UInt32)];
+		[stream readRect: &itemBox];
+		itemType = [stream readUInt8];
+		isEnabled = (itemType & 0x80) != 0;
+		itemType &= ~0x80;
+		[stream readStr255: itemText];
+		[stream alignOn: 2];
+		nsItemBox = NSRectFromQDRect(itemBox);
+		text = [[NSString alloc] initWithStr255: itemText];
+		
+		switch (itemType) {
+			case 4: {
+				BOOL isDefault = defaultOutlineBox.left < itemBox.left
+					&& defaultOutlineBox.top < itemBox.top
+					&& defaultOutlineBox.right > itemBox.right
+					&& defaultOutlineBox.bottom > itemBox.bottom;
+				bt = [[NSButton alloc] initWithFrame: nsItemBox];
+				[bt setTitle: text];
+				if (isDefault) {
+					[bt setKeyEquivalent: @"\r"];
+				}
+				[self addSubview: bt];
+				[bt release];
+				break;
+			}
+			
+			case 5:
+				bt = [[NSButton alloc] initWithFrame: nsItemBox];
+				[bt setTitle: text];
+				[bt setButtonType: NSButtonTypeSwitch];
+				[self addSubview: bt];
+				[bt release];
+				break;
+			
+			case 6:
+				bt = [[NSButton alloc] initWithFrame: nsItemBox];
+				[bt setTitle: text];
+				[bt setButtonType: NSButtonTypeRadio];
+				[self addSubview: bt];
+				[bt release];
+				break;
+			
+			case 7:
+				if (itemText[0] >= 2) {
+					short currVal, max, min, cdefID;
+					Handle cntl = NULL;
+					NSByteStream *cntlStream = nil;
+					short cntlResID = 0;
+					BlockMoveData(itemText + 1, &cntlResID, sizeof(cntlResID));
+					cntl = GetResource('CNTL', cntlResID);
+					cntlStream = [[NSByteStream alloc] initWithResource: cntl];
+					[cntlStream readRect: &itemBox];
+					nsItemBox = NSRectFromQDRect(itemBox);
+					currVal = [cntlStream readSInt16];
+					[cntlStream skip: 2]; // visible
+					max = [cntlStream readSInt16];
+					min = [cntlStream readSInt16];
+					cdefID = [cntlStream readSInt16];
+					[cntlStream skip: 4];
+					[cntlStream readStr255: itemText];
+					[cntlStream release];
+					
+					switch (cdefID) {
+						case 80: { // progress bar.
+							NSProgressIndicator *pv = [[NSProgressIndicator alloc] initWithFrame: nsItemBox];
+							[pv setDoubleValue: currVal];
+							[pv setMinValue: min];
+							[pv setMaxValue: max];
+							[self addSubview: pv];
+							[pv release];
+							break;
+						}
+						case 128:
+						case 129:
+						case 130:
+						case 131:
+						case 132:
+						case 133:
+						case 134:
+						case 135: { // tab control.
+							NSTabView *tc = nil;
+							short numTabs = 0, x = 0;
+							Str255 tabName;
+							NSByteStream *tabStream = [[NSByteStream alloc] initWithResource: GetResource('tab#',currVal)];
+							tc = [[NSTabView alloc] initWithFrame: nsItemBox];
+							[tabStream skip: 2]; // version.
+							numTabs = [tabStream readUInt16];
+							for (x = 0; x < numTabs; ++x) {
+								NSString *tabNameObject = nil;
+								NSTabViewItem * item = [[NSTabViewItem alloc] init];
+								[tabStream skip: 2]; // Icon ID
+								[tabStream readStr255: tabName];
+								[tabStream skip: 4];
+								[tabStream skip: 2];
+								tabNameObject = [[NSString alloc] initWithStr255: tabName];
+								[item setLabel: tabNameObject];
+								[tc addTabViewItem: item];
+								[tabNameObject release];
+								[item release];
+							}
+							[tabStream release];
+							tabStream = [[NSByteStream alloc] initWithResource: GetResource('TABs',currVal)];
+							numTabs = [tabStream readUInt16];
+							for (x = 0; x < numTabs; ++x) {
+								short ditlResID = 0;
+								Str255 tabIdentifier;
+								NSString *tabIdentifierObject = nil;
+								NSTabViewItem * item = [tc tabViewItemAtIndex: x];
+								[tabStream readStr255: tabIdentifier];
+								ditlResID = [tabStream readSInt16];
+								tabIdentifierObject = [[NSString alloc] initWithStr255: tabIdentifier];
+								[item setIdentifier: tabIdentifierObject];
+								[tabIdentifierObject release];
+								[[item view] loadSubviewsFromDITL: ditlResID firstResponder: NULL];
+							}
+							[tabStream release];
+
+							[self addSubview: tc];
+							[tc release];
+							break;
+						}
+					}
+				}
+				break;
+			
+			case 8:
+				if ((itemText[0] > 2) && (itemText[1] == '\\') && (itemText[2] == '\\')) {
+					char className[256];
+					Class theClass;
+					BlockMoveData(itemText + 3, className, itemText[0] - 2);
+					className[itemText[0] - 2] = 0;
+					theClass = objc_getClass(className);
+					if (theClass == [NSDefaultButtonOutline class]) {
+						defaultOutlineBox = itemBox;
+					}
+					vw = [[theClass alloc] initWithFrame: nsItemBox];
+					[self addSubview: vw];
+					if (outResponder && !(*outResponder) && [vw acceptsFirstResponder]) {
+						(*outResponder) = vw;
+					}
+					[vw release];
+				} else {
+					tf = [[NSTextField alloc] initWithFrame: nsItemBox];
+					[tf setStringValue: text];
+					[self addSubview: tf];
+					[tf release];
+				}
+				break;
+			
+			case 16:
+				tf = [[NSTextField alloc] initWithFrame: NSInsetRect(-4, -4, nsItemBox)];
+				[tf setBezeled: YES];
+				[tf setStringValue: text];
+				[self addSubview: tf];
+				if (outResponder && !(*outResponder)) {
+					(*outResponder) = tf;
+				}
+				[tf release];
+				break;
+			
+			default:
+				vw = [[NSView alloc] initWithFrame: nsItemBox];
+				[self addSubview: vw];
+				[vw release];
+				break;
+		}
+		[text release];	
+	}
+	[stream release];
 }
 
 -(NSRect) frame

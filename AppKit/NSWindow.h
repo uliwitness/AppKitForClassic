@@ -17,6 +17,7 @@
 	NSString *_title;
 	NSWindowContentView *_contentView;
 	NSResponder* _firstResponder;
+	BOOL _resizable;
 }
 
 -(id) initWithFrame: (NSRect)box title: (NSString*)title;

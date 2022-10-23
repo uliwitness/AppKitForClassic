@@ -154,18 +154,20 @@ NSApplication* NSApp = nil;
 						part = FindWindow(event.where, &currentWindow);
 						if (part == inContent || part == inGrow) {
 							NSWindow * wd = [NSWindow windowFromMacWindow: currentWindow];
-							[gCurrentMouseView mouseExited: eventObject];
 							nsMouse = NSPointFromQDPoint(event.where);
 							mouseView = [wd _subviewAtPoint: nsMouse];
-							if (mouseView) {
-								gCurrentMouseView = mouseView;
-								[gCurrentMouseView mouseEntered: eventObject];
-								DisposeRgn(mouseRgn);
-								mouseRgn = [mouseView _globalRegion];
-								//SectRgn(mouseRgn, currentWindow->visRgn, mouseRgn);
-							} else {
-								SetRectRgn(mouseRgn, event.where.h, event.where.v, event.where.h + 1, event.where.v + 1);
-								SetCursor(&qd.arrow);
+							if (gCurrentMouseView != mouseView) {
+								[gCurrentMouseView mouseExited: eventObject];
+								if (mouseView) {
+									gCurrentMouseView = mouseView;
+									[gCurrentMouseView mouseEntered: eventObject];
+									DisposeRgn(mouseRgn);
+									mouseRgn = [mouseView _globalRegion];
+									SectRgn(mouseRgn, currentWindow->visRgn, mouseRgn);
+								} else {
+									SetRectRgn(mouseRgn, event.where.h, event.where.v, event.where.h + 1, event.where.v + 1);
+									SetCursor(&qd.arrow);
+								}
 							}
 						} else {
 							SetRectRgn(mouseRgn, event.where.h, event.where.v, event.where.h + 1, event.where.v + 1);

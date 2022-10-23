@@ -6,6 +6,8 @@
 #import "ToolboxHider.h"
 #import "NSCursor.h"
 #include <Quickdraw.h>
+#include <Balloons.h>
+#include <stdio.h>
 
 
 NSView* gCurrentMouseView = nil;
@@ -28,6 +30,7 @@ NSView* gCurrentMouseView = nil;
 {
 	gCurrentMouseView = nil;
 	[_subviews release];
+	[_toolTip release];
 	
 	[super dealloc];
 }
@@ -65,6 +68,24 @@ NSView* gCurrentMouseView = nil;
 		NSPoint offset = NSMakePoint(pos.x + [currentSubview frame].origin.x, pos.y + [currentSubview frame].origin.y);
 		[currentSubview _drawRect: dirtyRect withOffset: offset];
 	}
+}
+
+-(void) setNeedsDisplay: (BOOL)state {
+	GrafPtr oldPort = NULL;
+	NSRect nsBox = [self convertRect: [self bounds] toView: nil];
+	Rect qdBox = {0};
+	qdBox = QDRectFromNSRect(nsBox);
+
+	GetPort(&oldPort);
+	SetPort([[self window] macGraphicsPort]);
+
+	if (state) {
+		InvalRect(&qdBox);
+	} else {
+		ValidRect(&qdBox);
+	}
+	
+	SetPort(oldPort);
 }
 
 -(NSRect) frame
@@ -255,12 +276,48 @@ NSView* gCurrentMouseView = nil;
 }
 
 -(void) mouseEntered: (NSEvent*)event {
-	[[NSCursor crosshairCursor] set];
+	[[NSCursor arrowCursor] set];
+	if (_toolTip && HMGetBalloons() && !HMIsBalloon()) {
+		OSErr err;
+		Point tipPos;
+		NSRect wdBox = [[self window] frame];
+		NSRect globalBox = [self convertRect: [self bounds] toView: nil];
+		Rect globalQDBox;
+		HMMessageRecord message;
+		globalBox.origin.x += wdBox.origin.x;
+		globalBox.origin.y += wdBox.origin.y;
+		message.hmmHelpType = khmmString;
+		message.u.hmmString[0] = [_toolTip length];
+		BlockMoveData([_toolTip cString], message.u.hmmString + 1, message.u.hmmString[0]);
+		tipPos.h = NSMidX(globalBox);
+		tipPos.v = NSMaxY(globalBox) - 1;
+		globalQDBox = QDRectFromNSRect(globalBox);
+		err = HMShowBalloon(&message, tipPos,
+		                      &globalQDBox,
+		                       NULL,
+		                       kBalloonWDEFID,
+		                       kTopLeftTipPointsUpVariant,
+		                       kHMRegularWindow);
+		printf("balloon result = %d\n", err);
+	}
 }
 
 -(void) mouseExited: (NSEvent*)event {
-
+	if (_toolTip && HMGetBalloons()) {
+		HMRemoveBalloon();
+	}
 }
+
+-(void) setToolTip: (NSString*)helpText {
+	NSString *oldVal = _toolTip;
+	_toolTip = [helpText retain];
+	[oldVal release];
+}
+
+-(NSString*) toolTip {
+	return _toolTip;
+}
+
 
 
 -(BOOL) _mouseDown: (NSEvent*)event
@@ -317,13 +374,43 @@ NSView* gCurrentMouseView = nil;
 
 -(RgnHandle) _globalRegion {
 	RgnHandle result = NewRgn();
+	RgnHandle currViewRgn = NewRgn();
 	NSRect nsBox = [self convertRect: [self bounds] toView: nil];
 	NSPoint wdPos = [[self window] frame].origin;
 	Rect qdBox = {0};
+	int x, count = [_subviews count];
+	NSMutableArray *peers = nil;
+	BOOL hadSelf = NO;
+	NSRect box;
 	nsBox.origin.x += wdPos.x;
-	nsBox.origin.y += wdPos.x;
+	nsBox.origin.y += wdPos.y;
 	qdBox = QDRectFromNSRect(nsBox);
 	RectRgn(result, &qdBox);
+	
+	for(x = 0; x < count; ++x)
+	{
+		NSView * currentSubview = [_subviews objectAtIndex: x];
+		box = [currentSubview convertRect: [currentSubview bounds] toView: nil];
+		SetRectRgn(currViewRgn, NSMinX(box), NSMinY(box), NSMaxX(box), NSMaxY(box));
+		DiffRgn(currViewRgn, result, result);
+	}
+	
+	peers = [_superview subviews];
+	count = [peers count];
+	for(x = 0; x < count; ++x)
+	{
+		NSView * currentSubview = [peers objectAtIndex: x];
+		if (currentSubview == self) {
+			hadSelf = YES;
+		} else if (hadSelf) { // Remove peer views on top of us.
+			box = [currentSubview convertRect: [currentSubview bounds] toView: nil];
+			SetRectRgn(currViewRgn, NSMinX(box), NSMinY(box), NSMaxX(box), NSMaxY(box));
+			DiffRgn(currViewRgn, result, result);
+		} // else ignore views below us.
+	}
+	
+	DisposeRgn(currViewRgn);
+	
 	return result;
 }
 

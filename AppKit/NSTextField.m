@@ -33,6 +33,7 @@
 	box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	
 	if (_bezeled) {
+		[[self backgroundColor] setFill];
 		TEActivate( _macTextField );
 		TEClick( clickPos, [event modifierFlags] & NSEventModifierFlagShift, _macTextField );
 	}
@@ -50,7 +51,11 @@
 
 -(void) mouseEntered: (NSEvent*)event
 {
-	[[NSCursor IBeamCursor] set];
+	if (_bezeled) {
+		[[NSCursor IBeamCursor] set];
+	} else {
+		[[NSCursor arrowCursor] set];
+	}
 }
 
 -(void) drawRect: (NSRect)dirtyRect
@@ -105,6 +110,7 @@
 		GetPort( &oldPort );
 		SetPort( [[self window] macGraphicsPort] );
 		
+		[[self backgroundColor] setFill];
 		_macTextField = TENew( &scrollableBox, &box );
 		(**_macTextField).txFont = 0;
 		(**_macTextField).txFace = normal;
@@ -149,6 +155,7 @@
 		GetPort( &oldPort );
 		SetPort( [[self window] macGraphicsPort] );
 		
+		[[self backgroundColor] setFill];
 		len = [_stringValue length];
 		TESetText( [_stringValue cString], len, _macTextField );
 		styleRec.tsFont = systemFont;
@@ -227,10 +234,13 @@
 		Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 		GetPort( &oldPort );
 		SetPort( [[self window] macGraphicsPort] );
+
+		[[self backgroundColor] setFill];
 		TEFeatureFlag(teFOutlineHilite, teBitSet, _macTextField);
 		TEActivate( _macTextField );
 		TESetSelect( 0, (**_macTextField).teLength, _macTextField );
 		InvalRect( &box );
+		
 		SetPort( oldPort );
 		
 		if( !_caretTimer ) {
@@ -250,9 +260,12 @@
 		Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 		GetPort( &oldPort );
 		SetPort( [[self window] macGraphicsPort] );
+
+		[[self backgroundColor] setFill];
 		TEDeactivate( _macTextField );
 		TEFeatureFlag(teFOutlineHilite, teBitClear, _macTextField);
 		InvalRect( &box );
+		
 		SetPort( oldPort );
 	}
 	return YES;
@@ -264,7 +277,10 @@
 	Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	GetPort( &oldPort );
 	SetPort( [[self window] macGraphicsPort] );
+	
+	[[self backgroundColor] setFill];
 	TEIdle(_macTextField);
+	
 	SetPort( oldPort );
 }
 
@@ -277,6 +293,8 @@
 		Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 		GetPort( &oldPort );
 		SetPort( [[self window] macGraphicsPort] );
+		
+		[[self backgroundColor] setFill];
 		if( [event modifierFlags] & shiftKey ) {
 			switch( keyPressed ) {
 				case kLeftArrowCharCode: {
@@ -301,6 +319,7 @@
 		if( typeKey ) {
 			TEKey( keyPressed, _macTextField );
 		}
+		
 		SetPort( oldPort );
 	}
 }
@@ -311,7 +330,10 @@
 	Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	GetPort( &oldPort );
 	SetPort( [[self window] macGraphicsPort] );
+	
+	[[self backgroundColor] setFill];
 	TECut(_macTextField);
+	
 	SetPort( oldPort );
 }
 
@@ -321,7 +343,10 @@
 	Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	GetPort( &oldPort );
 	SetPort( [[self window] macGraphicsPort] );
+
+	[[self backgroundColor] setFill];
 	TECopy(_macTextField);
+
 	SetPort( oldPort );
 }
 
@@ -331,7 +356,10 @@
 	Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	GetPort( &oldPort );
 	SetPort( [[self window] macGraphicsPort] );
+
+	[[self backgroundColor] setFill];
 	TEPaste(_macTextField);
+
 	SetPort( oldPort );
 }
 
@@ -341,7 +369,10 @@
 	Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	GetPort( &oldPort );
 	SetPort( [[self window] macGraphicsPort] );
+	
+	[[self backgroundColor] setFill];
 	TEDelete(_macTextField);
+	
 	SetPort( oldPort );
 }
 
@@ -358,32 +389,6 @@
 	return NO;
 }
 
--(void) mouseMoved: (NSEvent*)event
-{
-	GrafPtr oldPort;
-	Point pos, windowPos = { 0, 0 };
-	Rect box;
-	GetMouse(&pos);
-	
-	GetPort( &oldPort );
-	SetPort( [[self window] macGraphicsPort] );
-	LocalToGlobal( &windowPos );
-	SetPort( oldPort );
-	
-	box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
-	box.left += windowPos.h;
-	box.right += windowPos.h;
-	box.top += windowPos.v;
-	box.bottom += windowPos.v;
-	
-	if( PtInRect(pos, &box) ) {
-		CursHandle textCursor = GetCursor(iBeamCursor);
-		SetCursor(*textCursor);
-	} else {
-		SetCursor(&qd.arrow);
-	}
-}
-
 -(void) setBezeled: (BOOL)state {
 	Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	if (_bezeled) {
@@ -396,6 +401,7 @@
 	}
 
 	_bezeled = state;
+	[self setNeedsDisplay: YES];
 }
 
 

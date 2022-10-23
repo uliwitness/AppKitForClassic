@@ -56,11 +56,13 @@ struct DialogItemsResource {
                                  (WindowPtr) -1, /*frontmost*/
                                  true, /*closeBox*/
                                  (long)self);
+        box.origin = NSMakePoint(0,0);
         _contentView = [[NSWindowContentView alloc] initWithFrame: box];
         [_contentView setBackgroundColor: [NSColor windowBackgroundColor]];
         [_contentView setWindow: self];
         _hasWindow = YES;
         _nextResponder = [NSApplication sharedApplication];
+        _resizable = YES;
 	}
 	
 	return self;
@@ -97,6 +99,32 @@ struct DialogItemsResource {
 		autoPositioningFlags = [stream readUInt16]; // TODO: Position window based on this.
 		[stream release];
 		
+		switch(wdefID) {
+			case documentProc:
+			case zoomDocProc:
+			case floatGrowProc:
+			case floatZoomGrowProc:
+			case floatSideGrowProc:
+			case floatSideZoomGrowProc:
+			case kWindowGrowDocumentProc:
+			case kWindowVertZoomGrowDocumentProc:
+			case kWindowHorizZoomGrowDocumentProc:
+			case kWindowFullZoomGrowDocumentProc:
+			case kWindowMovableModalGrowProc:
+			case kWindowFloatGrowProc:
+			case kWindowFloatVertZoomGrowProc:
+			case kWindowFloatHorizZoomGrowProc:
+			case kWindowFloatFullZoomGrowProc:
+			case kWindowFloatSideGrowProc:
+			case kWindowFloatSideVertZoomGrowProc:
+			case kWindowFloatSideHorizZoomGrowProc:
+			case kWindowFloatSideFullZoomGrowProc:
+				_resizable = YES;
+				break;
+			default:
+				_resizable = NO;
+		}
+		
 		_title = [[NSString alloc] initWithStr255: title];
 		NewCWindow(& _macWindow, &qdBox,
 	                            title,
@@ -106,6 +134,7 @@ struct DialogItemsResource {
 	                            hasCloseBox,
 	                            (long)self);
         _hasWindow = YES;
+        nsBox.origin = NSMakePoint(0,0);
 	   	_contentView = [[NSWindowContentView alloc] initWithFrame: nsBox];
 	   	[_contentView setBackgroundColor: [NSColor windowBackgroundColor]];
 		[_contentView setWindow: self];
@@ -208,10 +237,21 @@ struct DialogItemsResource {
 }
 
 -(NSRect) frame {
+	Rect box;
+	GrafPtr oldPort = NULL;
+	Point globalLoc = {0};
 	if(!_hasWindow) {
 		return NSMakeRect(0,0,0,0);
 	}
-	return NSRectFromQDRect(((GrafPtr)&_macWindow)->portRect);
+	box = ((GrafPtr)&_macWindow)->portRect;
+	GetPort(&oldPort);
+	SetPort((GrafPtr)&_macWindow);
+	globalLoc.h = box.left;
+	globalLoc.v = box.top;
+	LocalToGlobal(&globalLoc);
+	SetPort(oldPort);
+	OffsetRect(&box, globalLoc.h, globalLoc.v);
+	return NSRectFromQDRect(box);
 }
 
 -(void) draw
@@ -220,6 +260,7 @@ struct DialogItemsResource {
 	Rect growRect;
 	NSRect windowContents;
 	RgnHandle oldClip;
+	UInt32 windowFeatures = 0;
 	
 	if(!_hasWindow) {
 		return;
@@ -237,10 +278,12 @@ struct DialogItemsResource {
 	
 	[_contentView _drawRect: windowContents withOffset: NSMakePoint(0, 0)];
 	
-	GetClip( oldClip );
-	ClipRect( &growRect );
-	DrawGrowIcon( (GrafPtr)&_macWindow );
-	SetClip( oldClip );
+	if (_resizable) {
+		GetClip( oldClip );
+		ClipRect( &growRect );
+		DrawGrowIcon( (GrafPtr)&_macWindow );
+		SetClip( oldClip );
+	}
 	
 	[NSGraphicsContext restoreGraphicsState];
 	[newCtx release];
@@ -380,7 +423,7 @@ struct DialogItemsResource {
 }
 
 -(NSView*) _subviewAtPoint: (NSPoint)pos {
-	pos = [self convertPoint: pos fromView: nil];
+	pos = [self convertPoint: pos fromWindow: nil];
 	return [_contentView _subviewAtPoint: pos];
 }
 

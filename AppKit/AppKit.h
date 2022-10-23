@@ -12,5 +12,6 @@
 #import "NSColor.h"
 #import "NSGraphicsContext.h"
 #import "NSResponder.h"
+#import "NSCursor.h"
 
 #import "ToolboxHider.h"

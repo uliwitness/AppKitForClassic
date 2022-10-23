@@ -27,6 +27,7 @@ typedef enum _NSAutoresizingMaskOptions {
 	NSMutableArray *_subviews;
 	NSView *_superview;
 	NSAutoresizingMaskOptions _autoresizingMask;
+	NSString *_toolTip;
 }
 
 -(id) initWithFrame: (NSRect)frame;
@@ -51,6 +52,9 @@ typedef enum _NSAutoresizingMaskOptions {
 -(void) mouseEntered: (NSEvent*)event;
 -(void) mouseExited: (NSEvent*)event;
 
+-(void) setToolTip: (NSString*)helpText;
+-(NSString*) toolTip;
+
 -(NSPoint) convertPoint: (NSPoint)pos fromView: (NSView*)view;
 -(NSRect) convertRect: (NSRect)pos toView: (NSView*)view;
 
@@ -58,6 +62,8 @@ typedef enum _NSAutoresizingMaskOptions {
 -(void) setAutoresizingMask: (NSAutoresizingMaskOptions)mask;
 -(void) resizeSubviewsWithOldSize: (NSSize)size;
 -(void) resizeWithOldSuperviewSize: (NSSize)size;
+
+-(void) setNeedsDisplay: (BOOL)state;
 
 // Private:
 -(NSColor*) backgroundColor;

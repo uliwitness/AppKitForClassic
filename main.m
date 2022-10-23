@@ -27,6 +27,7 @@
 	[[_mainWindow contentView] addSubview: innerView];
 	buttonView = [[[NSButton alloc] initWithFrame: NSMakeRect(30, 100, 100, 22)] autorelease];
 	[buttonView setTitle: @"Toot toot!"];
+	[buttonView setToolTip: @"This is actually a balloon!!!"];
 	[[_mainWindow contentView] addSubview: buttonView];
 	textView = [[[NSTextField alloc] initWithFrame: NSMakeRect(12, 230, 200, 100)] autorelease];
 	[textView setStringValue: @"The avalanche has already started. It is too late for the pebbles to vote."];
@@ -55,10 +56,10 @@ int main( void )
 	unsigned short refCount = RETAINCOUNT_FROM_ISA(testISA);
 	unsigned short classIndex = CLASS_INDEX_FROM_ISA(testISA);
 	void* rebuiltISA = ISA_FOR_INDEX_AND_REFCOUNT(classIndex, refCount);
-	
+		
 	NSApplication *app = [NSApplication sharedApplication];
 	NSObject<NSApplicationDelegate> *dele;
-	
+
 #if 0
 	NSMenu * mainMenu = [[NSMenu alloc] initWithTitle: @"MAIN MENU"];
 	NSMenu * appleMenu = [[NSMenu alloc] initWithTitle: @""];

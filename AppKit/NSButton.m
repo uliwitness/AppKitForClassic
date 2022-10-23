@@ -2,6 +2,7 @@
 #import "NSWindow.h"
 #import "NSColor.h"
 #import "NSEvent.h"
+#import "NSCursor.h"
 #import "NSApplication.h"
 //#include <ControlDefinitions.h>
 #define pushButProc 0
@@ -40,6 +41,11 @@
 
 -(void) mouseUp: (NSEvent*)event
 {
+}
+
+-(void) mouseEntered: (NSEvent*)event {
+	[super mouseEntered: event];
+	[[NSCursor pointingHandCursor] set];
 }
 
 -(void) drawRect: (NSRect)dirtyRect

@@ -42,6 +42,14 @@
 	return "";
 }
 
+- (void) getStr255: (Str255)outString {
+	unsigned len = [self length];
+	if (len > 255) len = 255;
+	outString[0] = len;
+	BlockMoveData([self cString], outString + 1, len);
+}
+
+
 -(BOOL) isEqualToString: (NSString*)str {
 	return strcmp([self cString], [str cString]) == 0;
 }

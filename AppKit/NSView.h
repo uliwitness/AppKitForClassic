@@ -28,6 +28,7 @@ typedef enum _NSAutoresizingMaskOptions {
 	NSView *_superview;
 	NSAutoresizingMaskOptions _autoresizingMask;
 	NSString *_toolTip;
+	BOOL _hidden;
 }
 
 -(id) initWithFrame: (NSRect)frame;
@@ -51,6 +52,9 @@ typedef enum _NSAutoresizingMaskOptions {
 -(void) mouseDown: (NSEvent*)event;
 -(void) mouseEntered: (NSEvent*)event;
 -(void) mouseExited: (NSEvent*)event;
+
+-(void) setHidden: (BOOL)state;
+-(BOOL) isHidden;
 
 -(void) setToolTip: (NSString*)helpText;
 -(NSString*) toolTip;

@@ -68,6 +68,28 @@ NSRect NSInsetRect(float x, float y, NSRect box) {
 	return box;
 }
 
+void NSDivideRect(NSRect inRect, NSRect *slice, NSRect *remainder, float amount, NSRectEdge edge) {
+	*slice = inRect;
+	*remainder = inRect;
+	if (edge == NSMinYEdge) {
+		slice->size.height = amount;
+		remainder->origin.y += amount;
+		remainder->size.height -= amount;
+	} else if (edge == NSMinXEdge) {
+		slice->size.width = amount;
+		remainder->origin.x += amount;
+		remainder->size.width -= amount;
+	} else if (edge == NSMaxYEdge) {
+		slice->size.height = amount;
+		slice->origin.y = inRect.origin.y + inRect.size.height - amount;
+		remainder->size.height -= amount;
+	} else if (edge == NSMaxXEdge) {
+		slice->size.width = amount;
+		slice->origin.x = inRect.origin.x + inRect.size.width - amount;
+		remainder->size.width -= amount;
+	}
+}
+
 
 Rect QDRectFromNSRect(NSRect box) {
 	Rect result;

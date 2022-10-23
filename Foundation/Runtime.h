@@ -96,22 +96,41 @@ typedef struct objc_super {
 	Class	isa;				//	base class must have isa member
 }
 
-+alloc;
++(id)alloc;
 -(void)dealloc;
--init;
+-(id)init;
 
 -(id)retain;
 -(void)release;
 -(id) autorelease;
 
 -(BOOL)conformsTo:(Protocol *)protocol;
-- performSelector:(SEL)aSelector;
-- performSelector:(SEL)aSelector withObject: (id)arg1;
+-(id) performSelector:(SEL)aSelector;
+-(id) performSelector:(SEL)aSelector withObject: (id)arg1;
 
 +(BOOL) respondsToSelector: (SEL)aSelector;
 -(BOOL) respondsToSelector: (SEL)aSelector;
 
 +(Class) class;
+-(Class) class;
+
+@end
+
+@protocol NSObject
+
+-(void)dealloc;
+-(id)init;
+
+-(id)retain;
+-(void)release;
+-(id) autorelease;
+
+-(BOOL)conformsTo:(Protocol *)protocol;
+-(id) performSelector:(SEL)aSelector;
+-(id) performSelector:(SEL)aSelector withObject: (id)arg1;
+
+-(BOOL) respondsToSelector: (SEL)aSelector;
+
 -(Class) class;
 
 @end

@@ -46,10 +46,13 @@ NSView* gCurrentMouseView = nil;
 	//FrameRect( &box );
 }
 
--(void) _drawRect: (NSRect)dirtyRect withOffset: (NSPoint)pos
-{
+-(void) _drawRect: (NSRect)dirtyRect withOffset: (NSPoint)pos {
 	GrafPtr currentPort = NULL;
 	int count, x;
+	
+	if (_hidden) {
+		return;
+	}
 	
 	GetPort( &currentPort );
 	SetOrigin( -pos.x, -pos.y );
@@ -318,13 +321,27 @@ NSView* gCurrentMouseView = nil;
 	return _toolTip;
 }
 
+-(void) setHidden: (BOOL)state {
+	_hidden = state;
+	[self setNeedsDisplay: YES];
+}
+
+-(BOOL) isHidden {
+	return _hidden;
+}
 
 
 -(BOOL) _mouseDown: (NSEvent*)event
 {
-	int x, count = [_subviews count];
+	int x, count = 0;
 	NSPoint pos;
 	NSRect box;
+
+	if (_hidden) {
+		return NO;
+	}
+
+	count = [_subviews count];
 
 	for( x = (count - 1); x >= 0; --x )
 	{
@@ -350,6 +367,12 @@ NSView* gCurrentMouseView = nil;
 -(NSView*) _subviewAtPoint: (NSPoint)pos {
 	int x, count = [_subviews count];
 	NSRect box;
+	
+	if (_hidden) {
+		return nil;
+	}
+
+	count = [_subviews count];
 
 	for( x = (count - 1); x >= 0; --x )
 	{

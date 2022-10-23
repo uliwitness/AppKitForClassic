@@ -34,6 +34,7 @@ static int NSMaxRange(NSRange range) {
 
 - (unsigned) length;
 - (const char *)cString;
+- (void) getStr255: (Str255)outString;
 
 -(BOOL) isEqualToString: (NSString*)str;
 

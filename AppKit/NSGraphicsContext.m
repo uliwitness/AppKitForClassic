@@ -128,7 +128,7 @@ NSGraphicsContext * gCurrentContext = nil;
 	GetPort( &oldPort );
 	SetPort( [gCurrentContext macGraphicsPort] );
 	
-	PaintRect( &qdBox );
+	EraseRect( &qdBox );
 	
 	SetPort( oldPort );
 }

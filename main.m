@@ -1,5 +1,6 @@
 #include "AppKit.h"
 #include "NSDefaultButtonOutline.h"
+#include "NSTabView.h"
 #include <stdio.h>
 
 @class MyAppDelegate;
@@ -103,6 +104,7 @@ int main( void )
 	
 	objc_registerClass([NSProgressIndicator class]);
 	objc_registerClass([NSDefaultButtonOutline class]);
+	objc_registerClass([NSTabView class]);
 
 	dele = [[MyAppDelegate alloc] init];
 	

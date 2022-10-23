@@ -16,6 +16,13 @@ typedef struct _NSRect {
 	NSSize size;
 } NSRect;
 
+typedef enum _NSRectEdge {
+	NSMinXEdge,
+	NSMinYEdge,
+	NSMaxXEdge,
+	NSMaxYEdge
+} NSRectEdge;
+
 NSRect NSMakeRect(float x, float y, float width, float height);
 NSPoint NSMakePoint(float x, float y);
 NSSize NSMakeSize(float w, float h);
@@ -28,6 +35,7 @@ float NSMidX(NSRect box);
 float NSMidY(NSRect box);
 
 NSRect NSInsetRect(float x, float y, NSRect box);
+void NSDivideRect(NSRect inRect, NSRect *slice, NSRect *remainder, float amount, NSRectEdge edge);
 
 Rect QDRectFromNSRect(NSRect box);
 NSRect NSRectFromQDRect(Rect box);

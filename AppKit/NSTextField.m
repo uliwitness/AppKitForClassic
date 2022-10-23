@@ -112,7 +112,7 @@
 		
 		[[self backgroundColor] setFill];
 		_macTextField = TENew( &scrollableBox, &box );
-		(**_macTextField).txFont = 0;
+		(**_macTextField).txFont = systemFont;
 		(**_macTextField).txFace = normal;
 		(**_macTextField).txSize = 12;
 		TEFeatureFlag(teFUseWhiteBackground, teBitClear, _macTextField);

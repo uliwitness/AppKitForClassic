@@ -68,6 +68,7 @@ typedef enum _NSAutoresizingMaskOptions {
 -(void) resizeWithOldSuperviewSize: (NSSize)size;
 
 -(void) setNeedsDisplay: (BOOL)state;
+-(void) setNeedsDisplayInRect: (NSRect)box;
 
 // Private:
 -(NSColor*) backgroundColor;

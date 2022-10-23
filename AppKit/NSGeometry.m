@@ -91,6 +91,12 @@ void NSDivideRect(NSRect inRect, NSRect *slice, NSRect *remainder, float amount,
 }
 
 
+BOOL NSPointInRect(NSPoint pos, NSRect box) {
+	return pos.x >= NSMinX(box) && pos.y >= NSMinY(box)
+			&& pos.x < NSMaxX(box) && pos.y < NSMaxY(box);
+}
+
+
 Rect QDRectFromNSRect(NSRect box) {
 	Rect result;
 	

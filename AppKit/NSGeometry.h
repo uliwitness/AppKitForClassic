@@ -37,6 +37,8 @@ float NSMidY(NSRect box);
 NSRect NSInsetRect(float x, float y, NSRect box);
 void NSDivideRect(NSRect inRect, NSRect *slice, NSRect *remainder, float amount, NSRectEdge edge);
 
+BOOL NSPointInRect(NSPoint pos, NSRect box);
+
 Rect QDRectFromNSRect(NSRect box);
 NSRect NSRectFromQDRect(Rect box);
 

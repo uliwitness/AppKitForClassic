@@ -15,6 +15,7 @@
 {
 	NSString *_label;
 	NSView *_view;
+	NSRect _tabBox;
 }
 
 -(void) setLabel: (NSString*)label;
@@ -22,6 +23,10 @@
 
 -(void) setView: (NSView*)view;
 -(NSView*) view;
+
+// Private:
+-(void) setTabBox: (NSRect)box;
+-(NSRect) tabBox;
 
 @end
 
@@ -36,5 +41,8 @@
 
 -(void) setDelegate: (id)dele;
 -(id) delegate;
+
+// Private:
+-(void) layoutTabs;
 
 @end

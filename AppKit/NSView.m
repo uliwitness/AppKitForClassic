@@ -37,7 +37,7 @@ NSView* gCurrentMouseView = nil;
 
 -(NSColor*) backgroundColor
 {
-	return [NSColor windowBackgroundColor];
+	return [[self superview] backgroundColor];
 }
 
 -(void) drawRect: (NSRect)dirtyRect
@@ -87,6 +87,20 @@ NSView* gCurrentMouseView = nil;
 	} else {
 		ValidRect(&qdBox);
 	}
+	
+	SetPort(oldPort);
+}
+
+-(void) setNeedsDisplayInRect: (NSRect)box {
+	GrafPtr oldPort = NULL;
+	NSRect nsBox = [self convertRect: box toView: nil];
+	Rect qdBox = {0};
+	qdBox = QDRectFromNSRect(nsBox);
+
+	GetPort(&oldPort);
+	SetPort([[self window] macGraphicsPort]);
+
+	InvalRect(&qdBox);
 	
 	SetPort(oldPort);
 }

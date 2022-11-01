@@ -55,7 +55,7 @@ int main( void )
 	NSObject<NSApplicationDelegate> *dele;
 
 	NSMenu * mainMenu = [NSMenu menuFromMBAR: 128];
-	[mainMenu debugPrintWithIndent: 0];
+	//[mainMenu debugPrintWithIndent: 0];
 	[app setMainMenu: mainMenu];
 
 	printf("Built menus.\n");

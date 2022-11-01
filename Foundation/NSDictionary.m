@@ -39,6 +39,10 @@
 	return [[NSMutableDictionary alloc] initWithImpl: _impl]; 
 }
 
+-(NSEnumerator*) keyEnumerator {
+	return [[[NSEnumerator alloc] initWithDictionaryImpl: _impl] autorelease];
+}
+
 @end
 
 @implementation NSMutableDictionary
@@ -49,6 +53,33 @@
 
 -(void) removeObjectForKey: (NSString*)key {
 	NSDictionaryImplRemoveObjectForKey(_impl, [key cString]);
+}
+
+@end
+
+@implementation NSEnumerator
+
+-(id) initWithDictionaryImpl: (struct NSDictionaryImpl*)dict {
+	self = [super init];
+	if (self) {
+		_impl = NSDictionaryImplKeyEnumeratorNew(dict);
+	}
+	return self;
+}
+
+-(void) dealloc {
+	NSDictionaryImplKeyEnumeratorFree(_impl);
+	
+	[super dealloc];
+}
+
+-(id) nextObject {
+	const char* keyString = NSDictionaryImplKeyEnumeratorNext(_impl);
+	NSString *result = nil;
+	if (keyString) {
+		result = [NSString stringWithCString: keyString];
+	}
+	return result;
 }
 
 @end

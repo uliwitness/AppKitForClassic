@@ -29,6 +29,8 @@
 	NSButton* buttonView = nil;
 	NSTextField* textView = nil;
 	NSMutableDictionary* dict = nil;
+	NSEnumerator* enny = nil;
+	NSString* currKey = nil;
 	_mainWindow = [[NSWindow alloc] initWithFrame: NSMakeRect(10, 50, 512, 342) title: @"AppKit on Classic!"];
 	innerView = [[[NSBox alloc] initWithFrame: NSMakeRect(100, 100, 300, 200)] autorelease];
 	[innerView setTitle: @"Boxing day!"];
@@ -66,7 +68,13 @@
 	
 	dict = [[[NSMutableDictionary alloc] init] autorelease];
 	[dict setObject: @"Hey a value!" forKey: @"the key"];
-	NSLog(@"dict[\"the key\"] = %@", [dict objectForKey: @"the key"]);
+	[dict setObject: @"Another value?" forKey: @"KEYBLOO"];
+	
+	NSLog(@"Dictionary Contents:");
+	enny = [dict keyEnumerator];
+	while ((currKey = [enny nextObject])) {
+		NSLog(@"\t%@ = %@", currKey, [dict objectForKey: currKey]);
+	}
 }
 
 @end

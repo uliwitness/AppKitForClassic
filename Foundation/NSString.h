@@ -1,5 +1,6 @@
 #include "Runtime.h"
 #include <Types.h>
+#include <stdarg.h>
 
 typedef struct _NSRange {
 	int location;
@@ -31,10 +32,13 @@ static int NSMaxRange(NSRange range) {
 -(id) initWithCString: (const char*)text;
 -(id) initWithCharacters: (const char*)text length: (unsigned)len;
 -(id) initWithStr255: (Str255)text;
+-(id) initWithFormat: (NSString*)fmtObj, ...;
+-(id) initWithFormat: (NSString*)fmtObj arguments: (va_list)ap;
 
 +(id) stringWithCString: (const char*)text;
 +(id) stringWithCharacters: (const char*)text length: (unsigned)len;
 +(id) stringWithStr255: (Str255)text;
++(id) stringWithFormat: (NSString*)fmtObj, ...;
 
 - (unsigned) length;
 - (const char *)cString;
@@ -46,6 +50,32 @@ static int NSMaxRange(NSRange range) {
 - (NSString*) substringWithRange: (NSRange)range;
 - (NSString*) substringFromIndex: (int)startIndex;
 - (NSString*) substringToIndex: (int)length;
+
+-(id) copy; 		// Always gives an immutable object (even when called on NSMutableString).
+-(id) mutableCopy;	// Always gives a new NSMutableString.
+
+@end
+
+// This is the only subclass of NSString you are supposed to create yourself.
+@interface NSMutableString : NSString
+{
+	char *_cString;
+	unsigned _length;
+}
+
+-(void) replaceCharactersInRange: (NSRange)range withString: (NSString*)str;
+
+// All implemented via -replaceCharactersInRange:withString:
+-(void) appendString: (NSString*)strObj;
+-(void) insertString: (NSString*)strObj atIndex: (unsigned)destIdx;
+-(void) deleteCharactersInRange: (NSRange)delRange;
+-(void) setString: (NSString*)strObj;
+
+-(void) appendFormat: (NSString*)fmtObj, ...;
+-(void) appendFormat: (NSString*)fmtObj arguments: (va_list)ap; // Nonstandard central format bottleneck.
+
+// Nonstandard, used by -replaceCharactersInRange:withString:
+-(void) replaceCharactersInRange: (NSRange)range withCharacters: (const char*)bytes length: (unsigned)len;
 
 @end
 

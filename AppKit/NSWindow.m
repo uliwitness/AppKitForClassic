@@ -376,6 +376,10 @@ struct DialogItemsResource {
 	IdleControls((GrafPtr)&_macWindow);
 }
 
+-(NSString*) description {
+	return [NSString stringWithFormat: @"%s<%p> { title = \"%@\" }", [self class]->name, self, _title];
+}
+
 +(NSWindow*)windowFromMacWindow: (WindowPtr)window
 {
 	return (NSWindow*) GetWRefCon(window);

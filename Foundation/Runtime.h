@@ -92,6 +92,8 @@ typedef struct objc_super {
 	Class	mclass;
 }	objc_super;
 
+@class NSString;
+
 // Base class is also used for constant strings etc. for which MWObjC assumes a fixed layout with
 // only an isa at the start, but we want it to implement no-ops for retain and release so we can
 // use them everywhere without having to know they're constant. So we store the refcount and a
@@ -117,6 +119,9 @@ typedef struct objc_super {
 
 +(BOOL) respondsToSelector: (SEL)aSelector;
 -(BOOL) respondsToSelector: (SEL)aSelector;
+
+-(id) valueForKey: (NSString*)ivarName;
+-(void) setValue: (id)obj forKey: (NSString*)ivarName;
 
 +(Class) class;
 -(Class) class;

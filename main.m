@@ -9,6 +9,11 @@
 {
 	NSWindow* _mainWindow;
 	NSWindow* _dlogWindow;
+	int _intVar;
+	unsigned _unsignedVar;
+	long _longVar;
+	unsigned long _unsignedLongVar;
+	BOOL _boolVar;
 }
 
 -(void) applicationDidFinishLaunching;
@@ -39,6 +44,22 @@
 	
 	_dlogWindow = [[NSWindow alloc] initWithDLOG: 128];
 	[_dlogWindow makeKeyAndOrderFront: self];
+	
+	_intVar = -42;
+	_unsignedVar = 666;
+	_longVar = -100000;
+	_unsignedLongVar = 500000;
+	_boolVar = YES;
+	
+	NSLog(@"_mainWindow = %@", [self valueForKey: @"_mainWindow"]);
+	NSLog(@"_intVar = %@", [self valueForKey: @"_intVar"]);
+	NSLog(@"_unsignedVar = %@", [self valueForKey: @"_unsignedVar"]);
+	NSLog(@"_longVar = %@", [self valueForKey: @"_longVar"]);
+	NSLog(@"_unsignedLongVar = %@", [self valueForKey: @"_unsignedLongVar"]);
+	NSLog(@"_boolVar = %@", [self valueForKey: @"_boolVar"]);
+	
+	[self setValue: [NSNumber numberWithUnsignedLong: 1000000000] forKey: @"_unsignedLongVar"];
+	printf("\n_unsignedLongVar = %lu\n", _unsignedLongVar);
 }
 
 @end

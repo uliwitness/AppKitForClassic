@@ -202,13 +202,108 @@ static IMP find_super_implementation(objc_super *argsuper,SEL sel)
 
 -(BOOL) respondsToSelector: (SEL)aSelector
 {
-	return find_method_implementation(self, aSelector) != NULL;
+	BOOL doesRespond = find_method_implementation(self, aSelector) != NULL;
+	//printf("%s<%p> %s to %s.\n", ISA_TO_PTR(self->isa)->name, self, (doesRespond ? "responds" : "doesn't respond"), aSelector);
+	return doesRespond;
 }
 
 +(BOOL) respondsToSelector: (SEL)aSelector
 {
 	return find_method_implementation(self, aSelector) != NULL;
 }
+
+-(id) valueForKey: (NSString*)ivarName {
+	const char* ivarNameStr = [ivarName cString];
+	Class currClass = ISA_TO_PTR(self->isa);
+	long count = currClass->ivars->ivar_count,
+	x = 0;
+	
+	while (currClass) {
+		for (x = 0; x < count; ++x) {
+			if (strcmp(currClass->ivars->ivar_list[x].ivar_name, ivarNameStr) == 0 ) {
+				if (strcmp("@", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					return *(id*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset);
+				} else if (strcmp(":", currClass->ivars->ivar_list[x].ivar_type) == 0) { // Treat Class same as 'id', it's a constant object.
+					return *(id*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset);
+				} else if (strcmp("s", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					return [NSNumber numberWithShort: *(short*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset)];
+				} else if (strcmp("S", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					return [NSNumber numberWithUnsignedShort: *(unsigned short*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset)];
+				} else if (strcmp("i", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					return [NSNumber numberWithInt: *(int*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset)];
+				} else if (strcmp("I", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					return [NSNumber numberWithUnsignedInt: *(unsigned*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset)];
+				} else if (strcmp("l", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					return [NSNumber numberWithLong: *(long*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset)];
+				} else if (strcmp("L", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					return [NSNumber numberWithUnsignedLong: *(unsigned long*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset)];
+				} else if (strcmp("c", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					return [NSNumber numberWithChar: *(((char*)self) + currClass->ivars->ivar_list[x].ivar_offset)];
+				} else if (strcmp("C", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					return [NSNumber numberWithUnsignedChar: *(((unsigned char*)self) + currClass->ivars->ivar_list[x].ivar_offset)];
+				} else if (strcmp("f", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					return [NSNumber numberWithFloat: *(float*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset)];
+				} else if (strcmp("d", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					return [NSNumber numberWithDouble: *(double*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset)];
+				}
+				printf("ERROR: Unknown ivar type '%s' on '%s'.\r", currClass->ivars->ivar_list[x].ivar_type, ivarNameStr);
+				return nil;
+			}
+		}
+		
+		currClass = currClass->super_class;
+	}
+	
+	printf("ERROR: Unknown ivar '%s'.\r", ivarNameStr);
+	return nil;
+}
+
+-(void) setValue: (id)obj forKey: (NSString*)ivarName {
+	const char* ivarNameStr = [ivarName cString];
+	Class currClass = ISA_TO_PTR(self->isa);
+	long count = currClass->ivars->ivar_count,
+	x = 0;
+	
+	while (currClass) {
+		for (x = 0; x < count; ++x) {
+			if (strcmp(currClass->ivars->ivar_list[x].ivar_name, ivarNameStr) == 0 ) {
+				if (strcmp("@", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					*(id*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = obj;
+				} else if (strcmp(":", currClass->ivars->ivar_list[x].ivar_type) == 0) { // Treat Class same as 'id', it's a constant object.
+					*(id*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = obj;
+				} else if (strcmp("s", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					*(short*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = [obj shortValue];
+				} else if (strcmp("S", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					*(unsigned short*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = [obj unsignedShortValue];
+				} else if (strcmp("i", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					*(int*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = [obj intValue];
+				} else if (strcmp("I", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					*(unsigned*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = [obj unsignedIntValue];
+				} else if (strcmp("l", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					*(long*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = [obj longValue];
+				} else if (strcmp("L", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					*(unsigned long*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = [obj unsignedLongValue];
+				} else if (strcmp("c", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					*(((char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = [obj charValue];
+				} else if (strcmp("C", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					*(((unsigned char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = [obj unsignedCharValue];
+				} else if (strcmp("f", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					*(float*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = [obj floatValue];
+				} else if (strcmp("d", currClass->ivars->ivar_list[x].ivar_type) == 0) {
+					*(double*) (((char*)self) + currClass->ivars->ivar_list[x].ivar_offset) = [obj doubleValue];
+				} else {
+					printf("ERROR: Unknown ivar type '%s' on '%s'.\r", currClass->ivars->ivar_list[x].ivar_type, ivarNameStr);
+				}
+				return;
+			}
+		}
+		
+		currClass = currClass->super_class;
+	}
+	
+	printf("ERROR: Unknown ivar '%s'.\r", ivarNameStr);
+}
+
 
 +(Class) class
 {

@@ -28,6 +28,7 @@
 	NSBox* innerView = nil;
 	NSButton* buttonView = nil;
 	NSTextField* textView = nil;
+	NSMutableDictionary* dict = nil;
 	_mainWindow = [[NSWindow alloc] initWithFrame: NSMakeRect(10, 50, 512, 342) title: @"AppKit on Classic!"];
 	innerView = [[[NSBox alloc] initWithFrame: NSMakeRect(100, 100, 300, 200)] autorelease];
 	[innerView setTitle: @"Boxing day!"];
@@ -61,7 +62,11 @@
 	NSLog(@"_boolVar = %@", [self valueForKey: @"_boolVar"]);
 	
 	[self setValue: [NSNumber numberWithUnsignedLong: 1000000000] forKey: @"_unsignedLongVar"];
-	NSLog(@"\n_unsignedLongVar = %lu", _unsignedLongVar);
+	NSLog(@"_unsignedLongVar = %lu", _unsignedLongVar);
+	
+	dict = [[[NSMutableDictionary alloc] init] autorelease];
+	[dict setObject: @"Hey a value!" forKey: @"the key"];
+	NSLog(@"dict[\"the key\"] = %@", [dict objectForKey: @"the key"]);
 }
 
 @end

@@ -1,4 +1,4 @@
-#import "Runtime.h"
+#import "NSMiniRuntime.h"
 
 enum _NSNumberType {
 	NSNumberTypeChar,

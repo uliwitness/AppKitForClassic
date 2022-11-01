@@ -1,4 +1,4 @@
-#import "Runtime.h"
+#import "NSMiniRuntime.h"
 #import "NSDate.h"
 
 @interface NSTimer : NSObject

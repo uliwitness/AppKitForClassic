@@ -5,7 +5,7 @@
 #import "NSGraphicsContext.h"
 #import "ToolboxHider.h"
 #import "NSCursor.h"
-#import "Runtime.h"
+#import "NSMiniRuntime.h"
 #import "NSDefaultButtonOutline.h"
 #import "NSProgressIndicator.h"
 #import "NSTabView.h"

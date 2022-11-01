@@ -1,4 +1,4 @@
-#import "Runtime.h"
+#import "NSMiniRuntime.h"
 #import "NSView.h"
 #import "NSArray.h"
 

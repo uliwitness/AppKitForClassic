@@ -5,12 +5,8 @@
 #import "NSCursor.h"
 #import "NSApplication.h"
 #import "NSTimer.h"
+#include "ToolboxHider.h"
 #include <stdio.h>
-
-#define kControlProgressBarProc	80
-
-#define kControlProgressBarIndeterminateTag FOUR_CHAR_CODE('inde')
-
 
 @implementation NSProgressIndicator
 
@@ -80,7 +76,7 @@
 }
 
 -(void) viewDidMoveToWindow: (NSWindow*)wd {
-	if (!_macControl) {
+	if (!_macControl && NSGetAppearanceVersion() != LONG_MIN) {
 		Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 		_macControl = newcontrol([wd macGraphicsPort],
 									&box,
@@ -96,6 +92,7 @@
 			SetControlData(_macControl, kControlEntireControl, kControlProgressBarIndeterminateTag,
 							sizeof(Boolean), &isDefault);
 		}
+	}
 	if (!_macControl && _indeterminate && !_indeterminateAnimationTimer) {
 		_indeterminateAnimationTimer = [NSTimer scheduledTimerWithTimeInterval: 0.1 target: self selector: @selector(animate:)
 													userInfo: nil repeats: YES];

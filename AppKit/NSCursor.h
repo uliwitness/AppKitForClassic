@@ -1,4 +1,4 @@
-#include "Runtime.h"
+#include "NSMiniRuntime.h"
 
 struct Cursor;
 

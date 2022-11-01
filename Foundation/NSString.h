@@ -1,4 +1,4 @@
-#include "Runtime.h"
+#include "NSMiniRuntime.h"
 #include <Types.h>
 #include <stdarg.h>
 

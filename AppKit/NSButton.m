@@ -4,13 +4,7 @@
 #import "NSEvent.h"
 #import "NSCursor.h"
 #import "NSApplication.h"
-//#include <ControlDefinitions.h>
-#define pushButProc 0
-#define checkBoxProc 1
-#define radioButProc 2
-#define inButton 10
-#define inCheckBox 11
-#define kControlPushButtonDefaultTag FOUR_CHAR_CODE('dflt') 
+#include "ToolboxHider.h"
 
 @implementation NSButton
 
@@ -107,9 +101,10 @@
 									1,
 									cdef,
 									(long)self);
-									
-		SetControlData(_macControl, kControlEntireControl, kControlPushButtonDefaultTag,
-						sizeof(Boolean), &isDefault);
+		if (NSGetAppearanceVersion() != LONG_MIN && cdef == pushButProc) {
+			SetControlData(_macControl, kControlEntireControl, kControlPushButtonDefaultTag,
+							sizeof(Boolean), &isDefault);
+		}
 	}
 }
 
@@ -189,12 +184,10 @@
 	_shortcut = [shortcut retain];
 	[oldVal release];
 	
-	if ([self window] != nil) {
-		if (_macControl) {
-			DisposeControl(_macControl);
-		}
-		_macControl = NULL;
-		[self viewDidMoveToWindow: [self window]];
+	if ([self window] != nil && NSGetAppearanceVersion() != LONG_MIN) {
+		Boolean isDefault = [_shortcut isEqualToString: @"\r"];
+		SetControlData(_macControl, kControlEntireControl, kControlPushButtonDefaultTag,
+						sizeof(Boolean), &isDefault);
 		[self setNeedsDisplay: YES];
 	}
 }

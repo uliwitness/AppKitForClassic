@@ -1,4 +1,4 @@
-#import "Runtime.h"
+#import "NSMiniRuntime.h"
 
 #import "NSString.h"
 #import "NSArray.h"
@@ -6,4 +6,5 @@
 #import "NSDate.h"
 #import "NSTimer.h"
 #import "NSAutoreleasePool.h"
+#import "NSDictionary.h"
 #import "NSObjCRuntime.h"

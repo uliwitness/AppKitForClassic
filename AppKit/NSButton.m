@@ -26,7 +26,7 @@
 
 -(NSColor*) backgroundColor
 {
-	return [[self window] backgroundColor];
+	return [[self superview] backgroundColor];
 }
 
 -(void) mouseDown: (NSEvent*)event

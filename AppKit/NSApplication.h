@@ -17,7 +17,7 @@
 @interface NSApplication : NSResponder
 {
 	BOOL _isRunning;
-	id<NSApplicationDelegate> _delegate;
+	NSObject<NSApplicationDelegate> *_delegate;
 	NSMenu *_mainMenu;
 }
 

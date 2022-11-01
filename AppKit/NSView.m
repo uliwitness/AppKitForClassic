@@ -11,7 +11,6 @@
 #import "NSTabView.h"
 #import "NSTextField.h"
 #import "NSByteStream.h"
-#import "NSTextField.h"
 #import "NSButton.h"
 #include <Quickdraw.h>
 #include <Balloons.h>
@@ -23,6 +22,10 @@ NSView* gCurrentMouseView = nil;
 
 
 @implementation NSView
+
+-(id) init {
+	return [self initWithFrame: NSZeroRect];
+}
 
 -(id) initWithFrame: (NSRect)frame
 {
@@ -39,7 +42,9 @@ NSView* gCurrentMouseView = nil;
 {
 	gCurrentMouseView = nil;
 	[_subviews release];
+	_subviews = nil;
 	[_toolTip release];
+	_toolTip = nil;
 	
 	[super dealloc];
 }
@@ -52,19 +57,32 @@ NSView* gCurrentMouseView = nil;
 -(void) drawRect: (NSRect)dirtyRect
 {
 	//Rect box = QDRectFromNSRect( [self bounds] );
+	//[[NSColor yellowColor] setStroke];
 	//FrameRect( &box );
 }
 
 -(void) _drawRect: (NSRect)dirtyRect withOffset: (NSPoint)pos {
-	GrafPtr currentPort = NULL;
 	int count, x;
-	
+#if CLIP_VIEWS
+	Rect box;
+	RgnHandle oldClip;
+#endif
+
 	if (_hidden) {
 		return;
 	}
 	
-	GetPort( &currentPort );
+#if CLIP_VIEWS
+	oldClip = NewRgn();
+	GetClip(oldClip);
+	
+	box = QDRectFromNSRect([self bounds]);
+	
 	SetOrigin( -pos.x, -pos.y );
+	ClipRect(&box);
+#else
+	SetOrigin( -pos.x, -pos.y );
+#endif
 	
 	[[self backgroundColor] set];
 	[NSBezierPath fillRect: [self bounds]];
@@ -72,7 +90,12 @@ NSView* gCurrentMouseView = nil;
 	
 	[self drawRect: dirtyRect];
 	SetOrigin( 0, 0 );
-	
+
+#if CLIP_VIEWS
+	SetClip(oldClip);
+	OffsetRect(&box, pos.x, pos.y);
+	ClipRect(&box);
+#endif
 	count = [_subviews count];
 	for( x = 0; x < count; ++x )
 	{
@@ -80,6 +103,11 @@ NSView* gCurrentMouseView = nil;
 		NSPoint offset = NSMakePoint(pos.x + [currentSubview frame].origin.x, pos.y + [currentSubview frame].origin.y);
 		[currentSubview _drawRect: dirtyRect withOffset: offset];
 	}
+	
+#if CLIP_VIEWS
+	SetClip(oldClip);
+	DisposeRgn(oldClip);
+#endif
 }
 
 -(void) setNeedsDisplay: (BOOL)state {
@@ -119,14 +147,14 @@ NSView* gCurrentMouseView = nil;
 	Handle ditl = GetResource('DITL', ditlResID);
 	NSByteStream *stream = [[NSByteStream alloc] initWithResource: ditl];
 	short x = 0, numItems = [stream readUInt16];
+	if (!ditl) {
+		return;
+	}
 	for (x = 0; x <= numItems; ++x) {
 		Rect	itemBox = {0};
 		UInt8	itemType = 0;
 		Str255	itemText = {0};
 		NSRect	nsItemBox = {0};
-		NSTextField * tf = nil;
-		NSView * vw = nil;
-		NSButton * bt = nil;
 		NSString * text = nil;
 		Boolean isEnabled = false;
 		
@@ -146,7 +174,7 @@ NSView* gCurrentMouseView = nil;
 					&& defaultOutlineBox.top < itemBox.top
 					&& defaultOutlineBox.right > itemBox.right
 					&& defaultOutlineBox.bottom > itemBox.bottom;
-				bt = [[NSButton alloc] initWithFrame: nsItemBox];
+				NSButton *bt = [[NSButton alloc] initWithFrame: nsItemBox];
 				[bt setTitle: text];
 				if (isDefault) {
 					[bt setKeyEquivalent: @"\r"];
@@ -156,21 +184,23 @@ NSView* gCurrentMouseView = nil;
 				break;
 			}
 			
-			case 5:
-				bt = [[NSButton alloc] initWithFrame: nsItemBox];
-				[bt setTitle: text];
-				[bt setButtonType: NSButtonTypeSwitch];
-				[self addSubview: bt];
-				[bt release];
+			case 5: {
+				NSButton *cb = [[NSButton alloc] initWithFrame: nsItemBox];
+				[cb setTitle: text];
+				[cb setButtonType: NSButtonTypeSwitch];
+				[self addSubview: cb];
+				[cb release];
 				break;
+			}
 			
-			case 6:
-				bt = [[NSButton alloc] initWithFrame: nsItemBox];
-				[bt setTitle: text];
-				[bt setButtonType: NSButtonTypeRadio];
-				[self addSubview: bt];
-				[bt release];
+			case 6: {
+				NSButton *rb = [[NSButton alloc] initWithFrame: nsItemBox];
+				[rb setTitle: text];
+				[rb setButtonType: NSButtonTypeRadio];
+				[self addSubview: rb];
+				[rb release];
 				break;
+			}
 			
 			case 7:
 				if (itemText[0] >= 2) {
@@ -259,42 +289,55 @@ NSView* gCurrentMouseView = nil;
 				if ((itemText[0] > 2) && (itemText[1] == '\\') && (itemText[2] == '\\')) {
 					char className[256];
 					Class theClass;
+					NSTextField *cv = nil;
 					BlockMoveData(itemText + 3, className, itemText[0] - 2);
 					className[itemText[0] - 2] = 0;
 					theClass = objc_getClass(className);
 					if (theClass == [NSDefaultButtonOutline class]) {
 						defaultOutlineBox = itemBox;
 					}
-					vw = [[theClass alloc] initWithFrame: nsItemBox];
-					[self addSubview: vw];
-					if (outResponder && !(*outResponder) && [vw acceptsFirstResponder]) {
-						(*outResponder) = vw;
+					cv = [[theClass alloc] initWithFrame: nsItemBox];
+					[self addSubview: cv];
+					if (outResponder && !(*outResponder) && [cv acceptsFirstResponder]) {
+						(*outResponder) = cv;
 					}
-					[vw release];
+					[cv release];
 				} else {
-					tf = [[NSTextField alloc] initWithFrame: nsItemBox];
-					[tf setStringValue: text];
-					[self addSubview: tf];
-					[tf release];
+					NSTextField *sf = [[NSTextField alloc] initWithFrame: nsItemBox];
+					//printf("%s<%p> refcount after creation: %u\n", ISA_TO_PTR(sf->isa)->name, sf, [sf retainCount]);
+					[sf setStringValue: text];
+					[self addSubview: sf];
+					//printf("%s<%p> refcount after adding: %u\n", ISA_TO_PTR(sf->isa)->name, sf, [sf retainCount]);
+					//printf("adding text field:\n");
+					//[sf debugPrintWithIndent: 1];
+					[sf release];
+					//printf("added text field.\n");
 				}
 				break;
 			
-			case 16:
-				tf = [[NSTextField alloc] initWithFrame: NSInsetRect(-4, -4, nsItemBox)];
-				[tf setBezeled: YES];
-				[tf setStringValue: text];
-				[self addSubview: tf];
+			case 16: {
+				NSTextField *ef = [[NSTextField alloc] initWithFrame: NSInsetRect(-4, -4, nsItemBox)];
+				//printf("%s<%p> refcount after creation: %u\n", ISA_TO_PTR(ef->isa)->name, ef, [ef retainCount]);
+				[ef setBezeled: YES];
+				[ef setStringValue: text];
+				[self addSubview: ef];
+				//printf("%s<%p> refcount after adding: %u\n", ISA_TO_PTR(ef->isa)->name, ef, [ef retainCount]);
 				if (outResponder && !(*outResponder)) {
-					(*outResponder) = tf;
+					(*outResponder) = ef;
 				}
-				[tf release];
+				//printf("adding edit field:\n");
+				//[ef debugPrintWithIndent: 1];
+				[ef release];
+				//printf("added edit field.\n");
 				break;
+			}
 			
-			default:
-				vw = [[NSView alloc] initWithFrame: nsItemBox];
+			default: {
+				NSView *vw = [[NSView alloc] initWithFrame: nsItemBox];
 				[self addSubview: vw];
 				[vw release];
 				break;
+			}
 		}
 		[text release];	
 	}
@@ -324,8 +367,19 @@ NSView* gCurrentMouseView = nil;
 
 -(void) addSubview: (NSView*)view
 {
+	//printf("adding subview:\n");
+	if (view->_superview) {
+		printf("WARNING: %s<%p> already has superview %s<%p> when added to %s<%p> [1]\n", ISA_TO_PTR(view->isa)->name, view, ISA_TO_PTR(view->_superview->isa)->name, view->_superview, ISA_TO_PTR(self->isa)->name, self);
+	}
+
+	if (!_subviews) {
+		printf("ERROR: No _subviews array in %s<%p>.\n", ISA_TO_PTR(self->isa)->name, self);
+	}
 	[_subviews addObject: view];
 	[view setSuperview: self];
+		
+	//[self debugPrintWithIndent: 1];
+	//printf("added subview.\n");
 }
 
 -(NSView*) superview
@@ -338,6 +392,10 @@ NSView* gCurrentMouseView = nil;
 	NSWindow * oldWin = [_superview window];
 	NSWindow * newWin = [parent window];
 	
+	if (_superview) {
+		printf("WARNING: %s<%p> already has superview %s<%p> when added to %s<%p> [2]\n", ISA_TO_PTR(self->isa)->name, self, ISA_TO_PTR(_superview->isa)->name, _superview, ISA_TO_PTR(parent->isa)->name, parent);
+	}
+
 	_superview = parent;
 	[self setNextResponder: parent];
 	
@@ -511,7 +569,9 @@ NSView* gCurrentMouseView = nil;
 		                       kBalloonWDEFID,
 		                       kTopLeftTipPointsUpVariant,
 		                       kHMRegularWindow);
-		printf("balloon result = %d\n", err);
+		if (err != noErr) {
+			printf("balloon error = %d\n", err);
+		}
 	}
 }
 
@@ -645,6 +705,22 @@ NSView* gCurrentMouseView = nil;
 	DisposeRgn(currViewRgn);
 	
 	return result;
+}
+
+-(void) debugPrintWithIndent: (unsigned)depth {
+	char* indent = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+	unsigned x = 0, count = 0;
+	for (x = 0; x < depth; ++x) {
+		printf("%c", indent[x]);
+	}
+	
+	count = [_subviews count];
+	printf("%s<%p> (%u subviews, superview %s<%p>)\n", [self class]->name, self, count, ISA_TO_PTR(_superview->isa)->name, _superview);
+	
+	for (x = 0; x < count; ++x) {
+		NSView * subview = [_subviews objectAtIndex: x];
+		[subview debugPrintWithIndent: depth + 1];
+	}
 }
 
 @end

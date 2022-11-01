@@ -5,6 +5,7 @@
 #import "NSMenuItem.h"
 #import "NSCursor.h"
 #include <string.h>
+#include <stdio.h>
 
 @implementation NSTextField
 
@@ -15,12 +16,14 @@
 	}
 	[_stringValue release];
 	
+	//printf("%p dealloced\n", self);
+	
 	[super dealloc];
 }
 
 -(NSColor*) backgroundColor
 {
-	return _bezeled ? [NSColor whiteColor] : [[self window] backgroundColor];
+	return _bezeled ? [NSColor whiteColor] : [[self superview] backgroundColor];
 }
 
 -(void) mouseDown: (NSEvent*)event
@@ -63,6 +66,8 @@
 	GrafPtr oldPort;
 	Rect outerBox = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 	Rect box = outerBox;
+	[super drawRect: dirtyRect];
+
 	if (_bezeled) {
 		InsetRect( &box, 4, 4 );
 	}
@@ -79,7 +84,7 @@
 		MoveTo(outerBox.right - 1, outerBox.top + 1);
 		LineTo(outerBox.right - 1, outerBox.bottom - 1);
 		LineTo(outerBox.left, outerBox.bottom - 1);
-		[[NSColor grayColor] setStroke];
+		[[NSColor lightGrayColor] setStroke];
 		MoveTo(outerBox.left, outerBox.bottom - 1);
 		LineTo(outerBox.left, outerBox.top);
 		LineTo(outerBox.right - 1, outerBox.top);
@@ -224,12 +229,12 @@
 
 -(BOOL) acceptsFirstResponder
 {
-	return _bezeled;
+	return _bezeled && !_hidden;
 }
 
 -(BOOL) becomeFirstResponder
 {
-	if (_macTextField && _bezeled) {
+	if (_macTextField && _bezeled && !_hidden) {
 		GrafPtr oldPort;
 		Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
 		GetPort( &oldPort );
@@ -247,8 +252,11 @@
 			_caretTimer = [NSTimer scheduledTimerWithTimeInterval: ((float)GetCaretTime()) / 60.0f target: self selector: @selector(flashCaret:)
 									userInfo: nil repeats: YES];
 		}
+		
+		return YES;
 	}
-	return YES;
+	
+	return NO;
 }
 
 -(BOOL) resignFirstResponder
@@ -402,6 +410,13 @@
 
 	_bezeled = state;
 	[self setNeedsDisplay: YES];
+}
+
+-(void) setHidden: (BOOL)shouldHide {
+	[super setHidden: shouldHide];
+	if (shouldHide) {
+		[[self window] selectNextKeyView: self];
+	}
 }
 
 

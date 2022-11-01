@@ -18,8 +18,11 @@
 #define Nil		((Class)0)
 #define nil		((id)0)
 
+// Stuff for accessing refcounts and Class pointers:
+extern struct objc_class **gClasses;
+
 #define kClassIndexShift 		1
-#define kClassIndexMask			0xfffeUL
+#define kClassIndexMask			0x0000fffeUL
 #define kRetainCountShift		16
 #define kRetainCountMask 		0xffff0000UL
 #define kRetainCountInISABit	(1UL << 0)
@@ -27,9 +30,12 @@
 #define RETAINCOUNT_FROM_ISA(n)	((((unsigned long)(n)) & kRetainCountMask) >> kRetainCountShift)
 #define CLASS_INDEX_FROM_ISA(n)	((((unsigned long)(n)) & kClassIndexMask) >> kClassIndexShift)
 #define ISA_FOR_INDEX_AND_REFCOUNT(idx, rc)	((void*)(kRetainCountInISABit | (((unsigned long)idx) << kClassIndexShift) | (((unsigned long)rc) << kRetainCountShift)))
-//	typedefs
+#define ISA_TO_PTR(isa) ((((unsigned long)(isa)) & kRetainCountInISABit) ? gClasses[CLASS_INDEX_FROM_ISA(isa)] : (isa))
 
+// Standard functions:
 #define NSSelectorFromString(objCStr) ((SEL)[objCStr cString])
+
+//	typedefs
 
 @class Protocol;
 
@@ -103,6 +109,7 @@ typedef struct objc_super {
 -(id)retain;
 -(void)release;
 -(id) autorelease;
+-(unsigned) retainCount;
 
 -(BOOL)conformsTo:(Protocol *)protocol;
 -(id) performSelector:(SEL)aSelector;

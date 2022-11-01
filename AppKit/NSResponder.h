@@ -20,6 +20,8 @@
 -(void) mouseEntered: (NSEvent*)event;
 -(void) mouseExited: (NSEvent*)event;
 
+-(void) idle: (NSEvent*)event;
+
 -(void) noResponderFor: (SEL)eventSelector;
 
 -(BOOL) acceptsFirstResponder;

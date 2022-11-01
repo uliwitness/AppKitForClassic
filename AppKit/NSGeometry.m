@@ -1,5 +1,10 @@
 #import "NSGeometry.h"
 
+NSRect NSZeroRect = { { 0, 0 }, { 0, 0 } };
+NSPoint NSZeroPoint = { 0, 0 };
+NSSize NSZeroSize = { 0, 0 };
+
+
 NSRect NSMakeRect(float x, float y, float width, float height)
 {
 	NSRect result;

@@ -44,6 +44,10 @@
 -(void) addTabViewItem: (NSTabViewItem*)anItem;
 -(NSTabViewItem*) tabViewItemAtIndex: (unsigned)idx;
 
+-(void) selectTabViewItem: (NSTabViewItem*)currentItem;
+-(void) selectTabViewItemAtIndex: (unsigned)itemIndex;
+-(NSTabViewItem*) selectedTabViewItem;
+
 -(void) setDelegate: (id)dele;
 -(id) delegate;
 

@@ -79,6 +79,7 @@ typedef enum _NSAutoresizingMaskOptions {
 -(BOOL) _mouseDown: (NSEvent*)event;
 -(NSView*) _subviewAtPoint: (NSPoint)pos;
 -(RgnHandle) _globalRegion; // For mouse enter/exit.
+-(void) debugPrintWithIndent: (unsigned)depth;
 
 @end
 

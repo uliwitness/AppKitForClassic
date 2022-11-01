@@ -10,6 +10,7 @@
 #import <stdio.h>
 #import <Resources.h>
 #import <TextUtils.h>
+#import <Controls.h>
 #include "ToolboxHider.h"
 
 
@@ -347,6 +348,10 @@ struct DialogItemsResource {
 	return YES;
 }
 
+-(void) selectNextKeyView: (id)sender {
+	[self makeFirstResponder: nil];
+}
+
 -(GrafPtr) macGraphicsPort
 {
 	if(!_hasWindow) {
@@ -364,7 +369,11 @@ struct DialogItemsResource {
 
 -(void) orderFrontStandardAboutPanel: (id)sender
 {
-	printf("Window About panel! WHOOO!\r");
+	printf("Window About panel! WHOOO!\n");
+}
+
+-(void) idle: (NSEvent*)event {
+	IdleControls((GrafPtr)&_macWindow);
 }
 
 +(NSWindow*)windowFromMacWindow: (WindowPtr)window

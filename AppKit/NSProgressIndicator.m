@@ -4,9 +4,12 @@
 #import "NSEvent.h"
 #import "NSCursor.h"
 #import "NSApplication.h"
+#import "NSTimer.h"
 //#include <ControlDefinitions.h>
 
 #define kControlProgressBarProc	80
+
+#define kControlProgressBarIndeterminateTag FOUR_CHAR_CODE('inde')
 
 
 @implementation NSProgressIndicator
@@ -16,6 +19,7 @@
 	if (self) {
 		_doubleValue = 50;
 		_maxValue = 100;
+		_indeterminate = YES;
 	}
 	return self;
 }
@@ -31,7 +35,7 @@
 
 -(NSColor*) backgroundColor
 {
-	return [[self window] backgroundColor];
+	return [[self superview] backgroundColor];
 }
 
 -(void) drawRect: (NSRect)dirtyRect
@@ -78,7 +82,23 @@
 									(SInt16)_maxValue,
 									kControlProgressBarProc,
 									(long)self);
+		if (_indeterminate) {
+			Boolean isDefault = _indeterminate;
+			SetControlData(_macControl, kControlEntireControl, kControlProgressBarIndeterminateTag,
+							sizeof(Boolean), &isDefault);
+		}
 	}
+}
+
+-(void) setIndeterminate: (BOOL)state {
+	Boolean isDefault = _indeterminate;
+	_indeterminate = state;
+	SetControlData(_macControl, kControlEntireControl, kControlProgressBarIndeterminateTag,
+					sizeof(Boolean), &isDefault);
+}
+
+-(BOOL) isIndeterminate {
+	return _indeterminate;
 }
 
 -(void) setDoubleValue: (double)curVal {

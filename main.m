@@ -12,7 +12,6 @@
 }
 
 -(void) applicationDidFinishLaunching;
--(void) applicationWillTerminate;
 
 @end
 
@@ -27,26 +26,19 @@
 	_mainWindow = [[NSWindow alloc] initWithFrame: NSMakeRect(10, 50, 512, 342) title: @"AppKit on Classic!"];
 	innerView = [[[NSView alloc] initWithFrame: NSMakeRect(100, 100, 300, 200)] autorelease];
 	[[_mainWindow contentView] addSubview: innerView];
-	buttonView = [[[NSButton alloc] initWithFrame: NSMakeRect(30, 100, 100, 22)] autorelease];
+	buttonView = [[[NSButton alloc] initWithFrame: NSMakeRect(30, 50, 100, 22)] autorelease];
 	[buttonView setTitle: @"Toot toot!"];
 	[buttonView setToolTip: @"This is actually a balloon!!!"];
-	[[_mainWindow contentView] addSubview: buttonView];
-	textView = [[[NSTextField alloc] initWithFrame: NSMakeRect(12, 230, 200, 100)] autorelease];
+	textView = [[[NSTextField alloc] initWithFrame: NSMakeRect(12, 130, 200, 100)] autorelease];
 	[textView setStringValue: @"The avalanche has already started. It is too late for the pebbles to vote."];
-	[textView setAutoresizingMask: NSViewMinXMargin | NSViewMaxYMargin | NSViewMaxXMargin | NSViewMinYMargin | NSViewWidthSizable | NSViewHeightSizable];
-	[[_mainWindow contentView] addSubview: textView];
+	[innerView setAutoresizingMask: NSViewMinXMargin | NSViewMaxYMargin | NSViewMaxXMargin | NSViewMinYMargin | NSViewWidthSizable | NSViewHeightSizable];
+	[innerView addSubview: textView];
+	[textView addSubview: buttonView];
 	focused = [_mainWindow makeFirstResponder: textView];
 	[_mainWindow makeKeyAndOrderFront: self];
 	
 	_dlogWindow = [[NSWindow alloc] initWithDLOG: 128];
 	[_dlogWindow makeKeyAndOrderFront: self];
-	
-	printf("Does this STILL work?\r");
-}
-
--(void) applicationWillTerminate
-{
-	
 }
 
 @end
@@ -62,45 +54,11 @@ int main( void )
 	NSApplication *app = [NSApplication sharedApplication];
 	NSObject<NSApplicationDelegate> *dele;
 
-#if 0
-	NSMenu * mainMenu = [[NSMenu alloc] initWithTitle: @"MAIN MENU"];
-	NSMenu * appleMenu = [[NSMenu alloc] initWithTitle: @""];
-	NSMenu * fileMenu = [[NSMenu alloc] initWithTitle: @"File"];
-	NSMenu * editMenu = [[NSMenu alloc] initWithTitle: @"Edit"];
-	NSMenuItem * appleMenuParentItem = [[NSMenuItem alloc] initWithTitle: @"-PARENT" target: nil action: NULL keyEquivalent: nil];
-	NSMenuItem * fileMenuParentItem = [[NSMenuItem alloc] initWithTitle: @"FILE-PARENT" target: nil action: NULL keyEquivalent: nil];
-	NSMenuItem * editMenuParentItem = [[NSMenuItem alloc] initWithTitle: @"EDIT-PARENT" target: nil action: NULL keyEquivalent: nil];
-	NSMenuItem * aboutItem = [[NSMenuItem alloc] initWithTitle: @"About AppKitForClassic..." target: nil action: @selector(orderFrontStandardAboutPanel:) keyEquivalent: @"B"];
-	NSMenuItem * quitItem = [[NSMenuItem alloc] initWithTitle: @"Quit" target: app action: @selector(terminate:) keyEquivalent: @"Q"];
-	NSMenuItem * undoItem = [[NSMenuItem alloc] initWithTitle: @"Undo" target: nil action: @selector(undo:) keyEquivalent: @"Z"];
-	NSMenuItem * editPasteboardSeparatorItem = [[NSMenuItem alloc] initWithTitle: @"-" target: nil action: NULL keyEquivalent: nil];
-	NSMenuItem * cutItem = [[NSMenuItem alloc] initWithTitle: @"Cut" target: nil action: @selector(cut:) keyEquivalent: @"X"];
-	NSMenuItem * copyItem = [[NSMenuItem alloc] initWithTitle: @"Copy" target: nil action: @selector(copy:) keyEquivalent: @"C"];
-	NSMenuItem * pasteItem = [[NSMenuItem alloc] initWithTitle: @"Paste" target: nil action: @selector(paste:) keyEquivalent: @"V"];
-	NSMenuItem * deleteItem = [[NSMenuItem alloc] initWithTitle: @"Clear" target: nil action: @selector(delete:) keyEquivalent: nil];
-	[appleMenuParentItem setSubmenu: appleMenu];
-	[fileMenuParentItem setSubmenu: fileMenu];
-	[editMenuParentItem setSubmenu: editMenu];
-	[mainMenu appendItem: appleMenuParentItem];
-	[mainMenu appendItem: fileMenuParentItem];
-	[mainMenu appendItem: editMenuParentItem];
-	
-	[appleMenu appendItem: aboutItem];
-	[fileMenu appendItem: quitItem];
-	
-	[editMenu appendItem: undoItem];
-	[editMenu appendItem: editPasteboardSeparatorItem];
-	[editMenu appendItem: cutItem];
-	[editMenu appendItem: copyItem];
-	[editMenu appendItem: pasteItem];
-	[editMenu appendItem: deleteItem];
-	
-	[app performSelector: @selector(setMainMenu:) withObject: mainMenu];
-#else
 	NSMenu * mainMenu = [NSMenu menuFromMBAR: 128];
 	[mainMenu debugPrintWithIndent: 0];
 	[app setMainMenu: mainMenu];
-#endif
+
+	printf("Built menus.\n");
 	
 	objc_registerClass([NSProgressIndicator class]);
 	objc_registerClass([NSDefaultButtonOutline class]);

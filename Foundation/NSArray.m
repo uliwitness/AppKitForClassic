@@ -2,6 +2,7 @@
 #import <stdlib.h>
 #import <memory.h>
 #import <string.h>
+#import <stdio.h>
 
 @implementation NSMutableArray
 
@@ -9,6 +10,7 @@
 	unsigned x;
 	for( x = 0; x < _count; ++x ) {
 		[_storage[x] release];
+		_storage[x] = nil;
 	}
 	free(_storage);
 
@@ -21,6 +23,7 @@
 }
 
 -(void) addObject: (id)obj {
+	//printf("adding %s<%p> to %s<%p>\n", ISA_TO_PTR(obj->isa)->name, obj, ISA_TO_PTR(self->isa)->name, self);
 	if( _storage == NULL ) {
 		_storage = malloc(sizeof(id));
 		if( _storage ) {
@@ -35,6 +38,7 @@
 			++_count;
 		}
 	}
+	//printf("added %s<%p> to %s<%p>\n", ISA_TO_PTR(obj->isa)->name, obj, ISA_TO_PTR(self->isa)->name, self);
 }
 
 -(id) objectAtIndex: (unsigned)idx {

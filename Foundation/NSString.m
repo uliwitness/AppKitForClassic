@@ -32,6 +32,18 @@
 	}
 }
 
++(id) stringWithCString: (const char*)text {
+	return [[[self alloc] initWithCString: text] autorelease];
+}
+
++(id) stringWithCharacters: (const char*)text length: (unsigned)len {
+	return [[[self alloc] initWithCharacters: text length: len] autorelease];
+}
+
++(id) stringWithStr255: (Str255)text {
+	return [[[self alloc] initWithStr255: text] autorelease];
+}
+
 - (unsigned) length
 {
 	return 0;

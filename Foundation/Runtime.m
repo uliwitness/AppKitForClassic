@@ -123,6 +123,7 @@ static IMP find_super_implementation(objc_super *argsuper,SEL sel)
 
 -init
 {
+	//printf("%s<%p> inited\n", ISA_TO_PTR(self->isa)->name, self);
 	//	nothing to initialize
 	return self;
 }
@@ -133,6 +134,9 @@ static IMP find_super_implementation(objc_super *argsuper,SEL sel)
 	if( ((unsigned long)isa) & kRetainCountInISABit ) {
 		unsigned long rc = RETAINCOUNT_FROM_ISA(isa) + 1;
 		isa = (Class) (((unsigned long)isa & ~kRetainCountMask) | (rc << kRetainCountShift));
+		//printf("%s<%p>.retaincount + 1 = %lu\n", ISA_TO_PTR(self->isa)->name, self, RETAINCOUNT_FROM_ISA(isa));
+	} else {
+		//printf("%s<%p> is constant, skipping retain\n", ISA_TO_PTR(self->isa)->name, self);
 	}
 	return self;
 }
@@ -142,9 +146,12 @@ static IMP find_super_implementation(objc_super *argsuper,SEL sel)
 	if( ((unsigned long)isa) & kRetainCountInISABit ) { // Not a constant object that got a *real* pointer for its isa?
 		unsigned long rc = RETAINCOUNT_FROM_ISA(isa) - 1;
 		isa = (Class)(((unsigned long)isa & ~kRetainCountMask) | (rc << kRetainCountShift));
+		//printf("%s<%p>.retaincount - 1 = %lu\n", ISA_TO_PTR(self->isa)->name, self, RETAINCOUNT_FROM_ISA(isa));
 		if( rc == 0 ) {
 			[self dealloc];
 		}
+	} else {
+		//printf("%s<%p> is constant, skipping release\n", ISA_TO_PTR(self->isa)->name, self);
 	}
 }
 
@@ -152,6 +159,15 @@ static IMP find_super_implementation(objc_super *argsuper,SEL sel)
 {
 	[gCurrentPool addObject: self];
 	return self;
+}
+
+-(unsigned) retainCount {
+	if( ((unsigned long)isa) & kRetainCountInISABit ) { // Not a constant object that got a *real* pointer for its isa?
+		unsigned long rc = RETAINCOUNT_FROM_ISA(isa);
+		return rc;
+	} else {
+		return 0;
+	}
 }
 
 

@@ -32,6 +32,10 @@ static int NSMaxRange(NSRange range) {
 -(id) initWithCharacters: (const char*)text length: (unsigned)len;
 -(id) initWithStr255: (Str255)text;
 
++(id) stringWithCString: (const char*)text;
++(id) stringWithCharacters: (const char*)text length: (unsigned)len;
++(id) stringWithStr255: (Str255)text;
+
 - (unsigned) length;
 - (const char *)cString;
 - (void) getStr255: (Str255)outString;

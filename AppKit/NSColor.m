@@ -185,7 +185,7 @@
 {
 	static NSColor *c = nil;
 	if( !c ) {
-		c = [[NSColor alloc] initWithRed: 0.85 green: 0.85 blue: 0.85];
+		c = [[NSColor alloc] initWithRed: 0.9 green: 0.9 blue: 0.9];
 	}
 	return c;
 }

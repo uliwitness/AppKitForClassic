@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <Types.h>
+#include <Memory.h>
+
 /*
  *	extern short InstallConsole(short fd);
  *
@@ -56,7 +59,13 @@ void RemoveConsole(void)
 
 long WriteCharsToConsole(char *buffer, long n)
 {
-	FILE* consoleFile = fopen(":console.txt", "a");
+	Str255 pstr;
+	FILE* consoleFile = NULL;
+	pstr[0] = n;
+	BlockMoveData(buffer, pstr + 1, pstr[0]);
+	DebugStr(pstr);
+	
+	consoleFile = fopen(":console.txt", "a");
 	fwrite(buffer, 1, n, consoleFile);
 	fflush(consoleFile);
 	fclose(consoleFile);
@@ -140,8 +149,10 @@ int getch(void)
 */
 void clrscr()
 {
+	FILE* consoleFile = NULL;
 	const char* spacer = "\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r";
-	FILE* consoleFile = fopen(":console.txt", "a");
+	DebugStr("\p\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r\r");
+	consoleFile = fopen(":console.txt", "a");
 	fwrite(spacer, 1, strlen(spacer), consoleFile);
 	fflush(consoleFile);
 	fclose(consoleFile);

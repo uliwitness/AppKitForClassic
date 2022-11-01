@@ -109,7 +109,7 @@
 {
 	int x;
 	for( x = 0; x < indent; ++x) { printf("\t"); }
-	printf("NSMenuItem %p \"%s\" (menu: %p submenu: %p)\n", self, [_title cString], _menu, _submenu);
+	printf("NSMenuItem %p \"%s\" (menu: %p submenu: %p action: %s)\n", self, [_title cString], _menu, _submenu, _action);
 	[_submenu debugPrintWithIndent: indent + 1];
 }
 

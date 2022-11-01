@@ -6,15 +6,16 @@
 #import "NSEvent.h"
 #include <Quickdraw.h>
 #include <Fonts.h>
+#include <stdio.h>
 
 #define TAB_H_OUTER_PADDING 	8
 #define TAB_H_INNER_PADDING 	12
 #define TAB_V_INNER_PADDING 	3
 #define CONTENT_INNER_PADDING	4
 
-@interface NSTabItemView : NSView
+@interface NSTabContentView : NSView
 {
-	NSColor *_backgroundColor;
+	//NSColor *_backgroundColor;
 }
 
 @end
@@ -25,7 +26,7 @@
 	self = [super init];
 	if (self) {
 		_label = @"Title";
-		_view = [[NSTabItemView alloc] init];
+		_view = [[NSTabContentView alloc] initWithFrame: NSZeroRect];
 	}
 	return self;
 }
@@ -210,7 +211,11 @@ static void DrawTab(Rect *currentTab) {
 		}
 		ErasePoly(tabBody);
 		KillPoly(tabBody);
-		[[NSColor darkGrayColor] setStroke];
+		if (_selectedTabViewItem == currentItem) {
+			[[NSColor blackColor] setStroke];
+		} else {
+			[[NSColor darkGrayColor] setStroke];
+		}
 		DrawTab(&currentTab);
 		
 		if (_selectedTabViewItem == currentItem) {
@@ -239,16 +244,41 @@ static void DrawTab(Rect *currentTab) {
 		NSTabViewItem * currentItem = [_tabViewItems objectAtIndex: x];
 		
 		if (NSPointInRect(pos, [currentItem tabBox])) {
-			NSRect box = [_selectedTabViewItem tabBox];
-			box.size.height += 1; // Make sure we also update the separator line.
-			[self setNeedsDisplayInRect: box];
-			[[_selectedTabViewItem view] setHidden: YES];
-			_selectedTabViewItem = currentItem;
-			box = [_selectedTabViewItem tabBox];
-			box.size.height += 1; // Make sure we also update the separator line.
-			[[_selectedTabViewItem view] setHidden: NO];
-			[self setNeedsDisplayInRect: box];
+			[self selectTabViewItem: currentItem];
 			break;
+		}
+	}
+	
+	//printf("mouseDown:\n");
+	//[self debugPrintWithIndent: 1];
+}
+
+-(NSTabViewItem*) selectedTabViewItem {
+	return _selectedTabViewItem;
+}
+
+-(void) selectTabViewItem: (NSTabViewItem*)currentItem {
+	NSRect box = [_selectedTabViewItem tabBox];
+	box.size.height += 1; // Make sure we also update the separator line.
+	[self setNeedsDisplayInRect: box];
+	[[_selectedTabViewItem view] setHidden: YES];
+	_selectedTabViewItem = currentItem;
+	box = [_selectedTabViewItem tabBox];
+	box.size.height += 1; // Make sure we also update the separator line.
+	[[_selectedTabViewItem view] setHidden: NO];
+	[self setNeedsDisplayInRect: box];
+}
+
+-(void) selectTabViewItemAtIndex: (unsigned)itemIndex {
+	[self selectTabViewItem: [_tabViewItems objectAtIndex: itemIndex]];
+}
+
+-(void) selectTabViewItemWithIdentifier: (NSString*)itemIdentifier {
+	int x = 0, count = [_tabViewItems count];
+	for (x = 0; x < count; ++x) {
+		NSTabViewItem * currentItem = [_tabViewItems objectAtIndex: x];
+		if ([[currentItem identifier] isEqualToString: itemIdentifier]) {
+			[self selectTabViewItem: currentItem];
 		}
 	}
 }
@@ -283,9 +313,9 @@ static NSColor * sColors[4] = {
 };
 
 
-@implementation NSTabItemView
+@implementation NSTabContentView
 
--(NSColor*) backgroundColor {
+/*-(NSColor*) backgroundColor {
 	if (!_backgroundColor) {
 		if (sColors[0] == nil) {
 			sColors[0] = [NSColor cyanColor];
@@ -300,6 +330,6 @@ static NSColor * sColors[4] = {
 		}
 	}
 	return _backgroundColor;
-}
+}*/
 
 @end

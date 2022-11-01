@@ -23,6 +23,10 @@ typedef enum _NSRectEdge {
 	NSMaxYEdge
 } NSRectEdge;
 
+extern NSRect NSZeroRect;
+extern NSPoint NSZeroPoint;
+extern NSSize NSZeroSize;
+
 NSRect NSMakeRect(float x, float y, float width, float height);
 NSPoint NSMakePoint(float x, float y);
 NSSize NSMakeSize(float w, float h);

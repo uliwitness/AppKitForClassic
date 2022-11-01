@@ -68,6 +68,29 @@ NSApplication* NSApp = nil;
 }
 
 
+-(void) idleWindows {
+	static long sLastIdleTicks = 0;
+	WindowPtr currWindow = FrontWindow();
+	EventRecord event = { nullEvent, 0UL, 0L, { 0, 0 }, 0U };
+	
+	if (sLastIdleTicks >= (TickCount() - 5)) {
+		return;
+	}
+
+	sLastIdleTicks = TickCount();
+	event.when = sLastIdleTicks;
+	GetMouse(&event.where);
+	
+	while (currWindow) {
+		NSWindow* currWindowObj = (NSWindow*) GetWRefCon(currWindow);
+		NSEvent* idleEvt = [[NSEvent alloc] initWithMacEvent: &event window: currWindowObj];
+		[currWindowObj idle: nil];
+		[idleEvt release];
+		currWindow = (WindowPtr) ((WindowPeek)currWindow)->nextWindow;
+	}
+}
+
+
 -(void) run
 {
 	NSAutoreleasePool * pool = nil;
@@ -92,13 +115,17 @@ NSApplication* NSApp = nil;
 	
 	[_mainMenu install];
 	
-	[_delegate applicationDidFinishLaunching];
+	if ([_delegate respondsToSelector: @selector(applicationDidFinishLaunching)]) {
+		[(id)_delegate applicationDidFinishLaunching];
+	}
 	
 	while( _isRunning ) {
 		unsigned long nextFireTime = [NSTimer fireTimersAt: TickCount()];
+		[self idleWindows];
+		
 		[pool release];
 		pool = [[NSAutoreleasePool alloc] init];
-	
+		
 		if( !WaitNextEvent( everyEvent, &event, nextFireTime, mouseRgn ) ) {
 			continue;
 		}
@@ -226,7 +253,9 @@ NSApplication* NSApp = nil;
 	[pool release];
 	pool = [[NSAutoreleasePool alloc] init];
 
-	[_delegate applicationWillTerminate];
+	if ([_delegate respondsToSelector: @selector(applicationWillTerminate)]) {
+		[(id)_delegate applicationWillTerminate];
+	}
 	
 	[pool release];
 }
@@ -367,7 +396,7 @@ NSApplication* NSApp = nil;
 
 -(void) orderFrontStandardAboutPanel: (id)sender
 {
-	printf("App About panel! WHOOO!\r");
+	printf("App About panel! WHOOO!\n");
 }
 
 @end

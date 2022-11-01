@@ -42,6 +42,8 @@
 -(BOOL) makeFirstResponder: (NSResponder*)responder;
 -(NSResponder*) firstResponder;
 
+-(void) selectNextKeyView: (id)sender;
+
 // Private:
 -(NSView*) _subviewAtPoint: (NSPoint)pos;
 -(GrafPtr) macGraphicsPort;

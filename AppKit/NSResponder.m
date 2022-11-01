@@ -67,6 +67,15 @@
 	[self noResponderFor: _cmd];
 }
 
+-(void) idle: (NSEvent*)event {
+	if( _nextResponder ) {
+		[_nextResponder idle: event];
+		return;
+	}
+	
+	[self noResponderFor: _cmd];
+}
+
 -(void) noResponderFor: (SEL)eventSelector {
 	if( eventSelector == @selector(keyDown:) ) {
 		NSBeep();

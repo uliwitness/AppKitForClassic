@@ -59,7 +59,7 @@
 	NSLog(@"_boolVar = %@", [self valueForKey: @"_boolVar"]);
 	
 	[self setValue: [NSNumber numberWithUnsignedLong: 1000000000] forKey: @"_unsignedLongVar"];
-	printf("\n_unsignedLongVar = %lu\n", _unsignedLongVar);
+	NSLog(@"\n_unsignedLongVar = %lu", _unsignedLongVar);
 }
 
 @end

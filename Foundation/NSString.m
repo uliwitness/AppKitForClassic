@@ -404,6 +404,13 @@
 					[self replaceCharactersInRange: NSMakeRange(_length, 0) withCharacters: hexAddress length: addStrLen];
 					break;
 				}
+				case 'c': {
+					char num = 0;
+					++x;
+					num = va_arg(ap, char);
+					[self replaceCharactersInRange: NSMakeRange(_length, 0) withCharacters: &num length: 1];
+					break;
+				}
 				case 'd': {
 					char numStr[100] = {0};
 					unsigned numStrLen = 0;
@@ -421,6 +428,53 @@
 					++x;
 					num = va_arg(ap, unsigned);
 					numStrLen = sprintf(numStr, "%u", num);
+					[self replaceCharactersInRange: NSMakeRange(_length, 0) withCharacters: numStr length: numStrLen];
+					break;
+				}
+				case 'x': {
+					char numStr[100] = {0};
+					unsigned numStrLen = 0;
+					unsigned int num = 0;
+					++x;
+					num = va_arg(ap, int);
+					numStrLen = sprintf(numStr, "%x", num);
+					[self replaceCharactersInRange: NSMakeRange(_length, 0) withCharacters: numStr length: numStrLen];
+					break;
+				}
+				case 'l': {
+					char numStr[100] = {0};
+					unsigned numStrLen = 0;
+					++x;
+					switch(fmt[x]) {
+						case 'd': {
+							long num = 0;
+							++x;
+							num = va_arg(ap, long);
+							numStrLen = sprintf(numStr, "%ld", num);
+							break;
+						}
+						case 'u': {
+							unsigned long num = 0;
+							++x;
+							num = va_arg(ap, long);
+							numStrLen = sprintf(numStr, "%lu", num);
+							break;
+						}
+						case 'x': {
+							unsigned long num = 0;
+							++x;
+							num = va_arg(ap, long);
+							numStrLen = sprintf(numStr, "%lx", num);
+							break;
+						}
+						case 0:
+							return;
+							break;
+						default:
+							[self replaceCharactersInRange: NSMakeRange(_length, 0) withCharacters: fmt + (x - 2) length: 3];
+							++x;
+							break;
+					}
 					[self replaceCharactersInRange: NSMakeRange(_length, 0) withCharacters: numStr length: numStrLen];
 					break;
 				}

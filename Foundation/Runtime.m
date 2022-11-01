@@ -8,8 +8,8 @@
 // -----------------------------------------------------------------------------
 //	Binary-compatible refCon storage:
 //		These contortions are needed so class layout of NSConstantString that
-//		The MWObjC compiler creates on disk, which do not have space for a ref
-//		count.
+//		the MWObjC compiler creates on disk, which does not have space for a ref
+//		count, matches the layout in RAM.
 // -----------------------------------------------------------------------------
 
 unsigned short index_for_class(Class c);

@@ -5,7 +5,6 @@
 #import "NSGraphicsContext.h"
 #import "NSByteStream.h"
 #import "NSApplication.h"
-#import "NSView+DITLLoading.h"
 #import <MacWindows.h>
 #import <stdio.h>
 #import <Resources.h>

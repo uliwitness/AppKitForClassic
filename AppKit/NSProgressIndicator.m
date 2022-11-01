@@ -5,7 +5,7 @@
 #import "NSCursor.h"
 #import "NSApplication.h"
 #import "NSTimer.h"
-//#include <ControlDefinitions.h>
+#include <stdio.h>
 
 #define kControlProgressBarProc	80
 
@@ -58,12 +58,21 @@
 		
 		filledBox = trackBox;
 		
-		RGBForeColor(&lightBlue);
-		PaintRect(&trackBox);
+		if (!_indeterminate) {
+			RGBForeColor(&lightBlue);
+			PaintRect(&trackBox);
 
-		filledBox.right = trackBox.left +(((double) trackBox.right - trackBox.left) * percentage);
-		RGBForeColor(&darkGray);
-		PaintRect(&filledBox);
+			filledBox.right = trackBox.left +(((double) trackBox.right - trackBox.left) * percentage);
+			RGBForeColor(&darkGray);
+			PaintRect(&filledBox);
+		} else {
+			short patternID = 7000 +((TickCount() / 6) % 8);
+			PixPatHandle pattern = GetPixPat(patternID);
+			PenPixPat(pattern);
+			PaintRect(&trackBox);
+			PenPat(&qd.black);
+			DisposePixPat(pattern);
+		}
 		
 		ForeColor(blackColor);
 		FrameRect(&trackBox);
@@ -87,14 +96,32 @@
 			SetControlData(_macControl, kControlEntireControl, kControlProgressBarIndeterminateTag,
 							sizeof(Boolean), &isDefault);
 		}
+	if (!_macControl && _indeterminate && !_indeterminateAnimationTimer) {
+		_indeterminateAnimationTimer = [NSTimer scheduledTimerWithTimeInterval: 0.1 target: self selector: @selector(animate:)
+													userInfo: nil repeats: YES];
+	} else if (_indeterminateAnimationTimer && (_macControl || !_indeterminate || [self window] == nil)) {
+		[_indeterminateAnimationTimer invalidate];
+		_indeterminateAnimationTimer = nil;
 	}
 }
 
 -(void) setIndeterminate: (BOOL)state {
 	Boolean isDefault = _indeterminate;
 	_indeterminate = state;
-	SetControlData(_macControl, kControlEntireControl, kControlProgressBarIndeterminateTag,
-					sizeof(Boolean), &isDefault);
+	if (_macControl) {
+		SetControlData(_macControl, kControlEntireControl, kControlProgressBarIndeterminateTag,
+						sizeof(Boolean), &isDefault);
+	} else if (_indeterminate && [self window]) {
+		_indeterminateAnimationTimer = [NSTimer scheduledTimerWithTimeInterval: 0.1 target: self selector: @selector(animate:)
+													userInfo: nil repeats: YES];
+	} else if (!_indeterminate || [self window] == nil) {
+		[_indeterminateAnimationTimer invalidate];
+		_indeterminateAnimationTimer = nil;
+	}
+}
+
+-(void) animate: (NSTimer*)sender {
+	[self setNeedsDisplay: YES];
 }
 
 -(BOOL) isIndeterminate {

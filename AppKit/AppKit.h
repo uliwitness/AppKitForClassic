@@ -6,6 +6,8 @@
 #import "NSView.h"
 #import "NSButton.h"
 #import "NSTextField.h"
+#import "NSTabView.h"
+#import "NSBox.h"
 #import "NSMenu.h"
 #import "NSMenuItem.h"
 #import "NSGeometry.h"

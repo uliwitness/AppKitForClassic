@@ -9,6 +9,7 @@
 	double _minValue;
 	double _maxValue;
 	BOOL _indeterminate;
+	NSTimer *_indeterminateAnimationTimer;
 }
 
 -(id) initWithFrame: (NSRect)frame;

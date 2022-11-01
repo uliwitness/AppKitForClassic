@@ -25,11 +25,13 @@
 -(void) applicationDidFinishLaunching
 {
 	BOOL focused = NO;
-	NSView* innerView = nil;
+	NSBox* innerView = nil;
 	NSButton* buttonView = nil;
 	NSTextField* textView = nil;
 	_mainWindow = [[NSWindow alloc] initWithFrame: NSMakeRect(10, 50, 512, 342) title: @"AppKit on Classic!"];
-	innerView = [[[NSView alloc] initWithFrame: NSMakeRect(100, 100, 300, 200)] autorelease];
+	innerView = [[[NSBox alloc] initWithFrame: NSMakeRect(100, 100, 300, 200)] autorelease];
+	[innerView setTitle: @"Boxing day!"];
+	[innerView setFillColor: [NSColor whiteColor]];
 	[[_mainWindow contentView] addSubview: innerView];
 	buttonView = [[[NSButton alloc] initWithFrame: NSMakeRect(30, 50, 100, 22)] autorelease];
 	[buttonView setTitle: @"Toot toot!"];

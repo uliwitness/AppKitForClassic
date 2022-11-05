@@ -2,6 +2,8 @@
 #include <Types.h>
 #include <stdarg.h>
 
+@class NSArray;
+
 typedef struct _NSRange {
 	int location;
 	int length;
@@ -50,6 +52,12 @@ static int NSMaxRange(NSRange range) {
 - (NSString*) substringWithRange: (NSRange)range;
 - (NSString*) substringFromIndex: (int)startIndex;
 - (NSString*) substringToIndex: (int)length;
+
+- (NSArray*) componentsSeparatedByString: (NSString*)separator;
+
+- (int) compare: (id)other;
+- (int) caseInsensitiveCompare: (id)other;
+- (BOOL) isEqual: (id)other;
 
 -(id) copy; 		// Always gives an immutable object (even when called on NSMutableString).
 -(id) mutableCopy;	// Always gives a new NSMutableString.

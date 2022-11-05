@@ -360,7 +360,7 @@ NSView* gCurrentMouseView = nil;
 	return NSMakeRect( 0, 0, _frame.size.width, _frame.size.height );
 }
 
--(NSMutableArray*) subviews
+-(NSArray*) subviews
 {
 	return _subviews;
 }
@@ -672,7 +672,7 @@ NSView* gCurrentMouseView = nil;
 	NSPoint wdPos = [[self window] frame].origin;
 	Rect qdBox = {0};
 	int x, count = [_subviews count];
-	NSMutableArray *peers = nil;
+	NSArray *peers = nil;
 	BOOL hadSelf = NO;
 	NSRect box;
 	nsBox.origin.x += wdPos.x;

@@ -26,15 +26,3 @@
 -(void) removeObjectForKey: (NSString*)key;
 
 @end
-
-@interface NSEnumerator : NSObject
-{
-	struct NSDictionaryImplIterator *_impl;
-}
-
--(id) nextObject;
-
-// private
--(id) initWithDictionaryImpl: (struct NSDictionaryImpl*)dict;
-
-@end

@@ -6,6 +6,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <OSUtils.h>
+#include <StringCompare.h>
 
 // Dummy class used for creating subclass instances when you call
 // alloc/initXXX on an object on NSString. Note these are *class*
@@ -116,6 +117,61 @@
 	}
 	subject = [self cString];
 	return [[[NSString alloc] initWithCharacters: subject length: length] autorelease];
+}
+
+-(NSArray*) componentsSeparatedByString: (NSString*)separator {
+	NSMutableArray *result = [[[NSMutableArray alloc] init] autorelease];
+	const char *target = [self cString];
+	unsigned targetLen = [self length];
+	const char *sep = [separator cString];
+	unsigned sepLen = [separator length];
+	const char* newStart = target;
+	NSString * newElement = nil;
+	
+	while (true) {
+		char* sepStart = strstr(newStart, sep);
+		if (sepStart == NULL) { break; }
+		newElement = [[NSString alloc] initWithCharacters: newStart length: sepStart - newStart];
+		[result addObject: newElement];
+		[newElement release];
+		newStart = sepStart + sepLen;
+	}
+	
+	newElement = [[NSString alloc] initWithCharacters: newStart length: targetLen -(newStart - target)];
+	[result addObject: newElement];
+	[newElement release];
+	
+	return result;
+}
+
+-(int) compare: (id)other {
+	if (self == other) {
+		return 0;
+	}
+	if (![other isKindOfClass: [NSString class]]) {
+		return -1;
+	}
+	return relstring([self cString], [other cString], true, true);
+}
+
+-(int) caseInsensitiveCompare: (id)other {
+	if (self == other) {
+		return 0;
+	}
+	if (![other isKindOfClass: [NSString class]]) {
+		return -1;
+	}
+	return relstring([self cString], [other cString], false, true);
+}
+
+-(BOOL) isEqual: (id)other {
+	if (self == other) {
+		return YES;
+	}
+	if (![other isKindOfClass: [NSString class]]) {
+		return NO;
+	}
+	return strcmp([self cString], [other cString]) == 0;
 }
 
 -(id) copy {
@@ -456,14 +512,14 @@
 						case 'u': {
 							unsigned long num = 0;
 							++x;
-							num = va_arg(ap, long);
+							num = va_arg(ap, unsigned long);
 							numStrLen = sprintf(numStr, "%lu", num);
 							break;
 						}
 						case 'x': {
 							unsigned long num = 0;
 							++x;
-							num = va_arg(ap, long);
+							num = va_arg(ap, unsigned long);
 							numStrLen = sprintf(numStr, "%lx", num);
 							break;
 						}

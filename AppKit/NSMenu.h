@@ -19,7 +19,7 @@
 -(id) initWithTitle: (NSString*)title;
 -(id) initWithMENU: (short)menuID;
 
--(NSMutableArray*) itemArray;
+-(NSArray*) itemArray;
 -(void) appendItem: (NSMenuItem*)item;
 
 -(NSMenu*) supermenu;

@@ -41,7 +41,7 @@ unsigned short index_for_class(Class c) {
 // so a real object pointer would never have its low bit set.
 #define ISA_TO_PTR(isa) ((((unsigned long)(isa)) & kRetainCountInISABit) ? gClasses[CLASS_INDEX_FROM_ISA(isa)] : (isa))
 
-static IMP find_method_implementation(id receiver,SEL sel)
+IMP find_method_implementation(id receiver,SEL sel)
 {
 	if(receiver!=nil)
 	{
@@ -121,7 +121,7 @@ static IMP find_super_implementation(objc_super *argsuper,SEL sel)
 	free(self);
 }
 
--init
+-(id)init
 {
 	//printf("%s<%p> inited\n", ISA_TO_PTR(self->isa)->name, self);
 	//	nothing to initialize
@@ -170,6 +170,16 @@ static IMP find_super_implementation(objc_super *argsuper,SEL sel)
 	}
 }
 
+-(BOOL)isKindOfClass: (Class)otherClass {
+	Class	currClass;
+
+	for (currClass = ISA_TO_PTR(self->isa); currClass; currClass = currClass->super_class) {
+		if (currClass == otherClass) {
+			return YES;
+		}
+	}
+	return NO;
+}
 
 -(BOOL)conformsTo:(Protocol *)protocol
 {

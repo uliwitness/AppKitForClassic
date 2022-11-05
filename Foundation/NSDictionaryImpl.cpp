@@ -59,18 +59,27 @@ extern "C" id NSDictionaryImplGetObjectForKey(struct NSDictionaryImpl *dict, con
 	return dict->_map[string(key)]._object;
 }
 
-extern "C" struct NSDictionaryImplIterator *NSDictionaryImplKeyEnumeratorNew(struct NSDictionaryImpl *dict) {
+extern "C" struct NSDictionaryImplIterator *NSDictionaryImplEnumeratorNew(struct NSDictionaryImpl *dict) {
 	return new struct NSDictionaryImplIterator(dict->_map.begin(), dict);
 }
 
-extern "C" void NSDictionaryImplKeyEnumeratorFree(struct NSDictionaryImplIterator *itty) {
+extern "C" void NSDictionaryImplEnumeratorFree(struct NSDictionaryImplIterator *itty) {
 	delete itty;
 }
 
-extern "C" const char* NSDictionaryImplKeyEnumeratorNext(struct NSDictionaryImplIterator *itty) {
+extern "C" const char* NSDictionaryImplEnumeratorNextKey(struct NSDictionaryImplIterator *itty) {
 	const char* result = NULL;
 	if (itty->_iterator != itty->_owner->_map.end()) {
 		result = itty->_iterator->first.c_str();
+		++itty->_iterator;
+	}
+	return result;
+}
+
+extern "C" id NSDictionaryImplEnumeratorNextObject(struct NSDictionaryImplIterator *itty) {
+	id result = nil;
+	if (itty->_iterator != itty->_owner->_map.end()) {
+		result = itty->_iterator->second._object;
 		++itty->_iterator;
 	}
 	return result;

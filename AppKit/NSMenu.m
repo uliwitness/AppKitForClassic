@@ -124,7 +124,7 @@ ResID gMenuIDSeed = 128;
 	return title;
 }
 
--(NSMutableArray*) itemArray
+-(NSArray*) itemArray
 {
 	return _itemArray;
 }

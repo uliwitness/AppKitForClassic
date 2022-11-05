@@ -7,6 +7,7 @@ EXTERN_C void NSDictionaryImplSetObjectForKey(struct NSDictionaryImpl *dict, id 
 EXTERN_C void NSDictionaryImplRemoveObjectForKey(struct NSDictionaryImpl *dict, const char* key);
 EXTERN_C id NSDictionaryImplGetObjectForKey(struct NSDictionaryImpl *dict, const char* key);
 
-EXTERN_C struct NSDictionaryImplIterator *NSDictionaryImplKeyEnumeratorNew(struct NSDictionaryImpl *dict);
-EXTERN_C void NSDictionaryImplKeyEnumeratorFree(struct NSDictionaryImplIterator *itty);
-EXTERN_C const char* NSDictionaryImplKeyEnumeratorNext(struct NSDictionaryImplIterator *itty);
+EXTERN_C struct NSDictionaryImplIterator *NSDictionaryImplEnumeratorNew(struct NSDictionaryImpl *dict);
+EXTERN_C void NSDictionaryImplEnumeratorFree(struct NSDictionaryImplIterator *itty);
+EXTERN_C const char* NSDictionaryImplEnumeratorNextKey(struct NSDictionaryImplIterator *itty);
+EXTERN_C id NSDictionaryImplEnumeratorNextObject(struct NSDictionaryImplIterator *itty);

@@ -1,6 +1,32 @@
 #import "NSDictionary.h"
 #import "NSString.h"
+#import "NSEnumerator.h"
 #include <Types.h>
+
+@interface NSDictionaryEnumerator : NSEnumerator
+{
+	struct NSDictionaryImplIterator *_impl;
+}
+
+// private
+-(id) initWithDictionaryImpl: (struct NSDictionaryImpl*)dict;
+
+@end
+
+
+@interface NSDictionaryKeyEnumerator : NSDictionaryEnumerator
+
+-(id) nextObject;
+
+@end
+
+
+@interface NSDictionaryObjectEnumerator : NSDictionaryEnumerator
+
+-(id) nextObject;
+
+@end
+
 
 @implementation NSDictionary
 
@@ -40,7 +66,11 @@
 }
 
 -(NSEnumerator*) keyEnumerator {
-	return [[[NSEnumerator alloc] initWithDictionaryImpl: _impl] autorelease];
+	return [[[NSDictionaryKeyEnumerator alloc] initWithDictionaryImpl: _impl] autorelease];
+}
+
+-(NSEnumerator*) objectEnumerator {
+	return [[[NSDictionaryObjectEnumerator alloc] initWithDictionaryImpl: _impl] autorelease];
 }
 
 @end
@@ -57,29 +87,41 @@
 
 @end
 
-@implementation NSEnumerator
+@implementation NSDictionaryEnumerator
 
 -(id) initWithDictionaryImpl: (struct NSDictionaryImpl*)dict {
 	self = [super init];
 	if (self) {
-		_impl = NSDictionaryImplKeyEnumeratorNew(dict);
+		_impl = NSDictionaryImplEnumeratorNew(dict);
 	}
 	return self;
 }
 
 -(void) dealloc {
-	NSDictionaryImplKeyEnumeratorFree(_impl);
+	NSDictionaryImplEnumeratorFree(_impl);
 	
 	[super dealloc];
 }
 
+@end
+
+@implementation NSDictionaryKeyEnumerator
+
 -(id) nextObject {
-	const char* keyString = NSDictionaryImplKeyEnumeratorNext(_impl);
+	const char* keyString = NSDictionaryImplEnumeratorNextKey(_impl);
 	NSString *result = nil;
 	if (keyString) {
 		result = [NSString stringWithCString: keyString];
 	}
 	return result;
+}
+
+@end
+
+@implementation NSDictionaryObjectEnumerator
+
+-(id) nextObject {
+	return NSDictionaryImplEnumeratorNextObject(_impl);
 }
 
 @end

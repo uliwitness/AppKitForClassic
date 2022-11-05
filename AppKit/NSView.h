@@ -40,7 +40,7 @@ typedef enum _NSAutoresizingMaskOptions {
 
 -(NSRect) bounds;
 
--(NSMutableArray*) subviews;
+-(NSArray*) subviews;
 -(void) addSubview: (NSView*)view;
 
 -(NSView*) superview;

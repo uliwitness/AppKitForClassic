@@ -29,6 +29,7 @@
 	NSButton* buttonView = nil;
 	NSTextField* textView = nil;
 	NSMutableDictionary* dict = nil;
+	NSMutableArray * arr = nil;
 	NSEnumerator* enny = nil;
 	NSString* currKey = nil;
 	_mainWindow = [[NSWindow alloc] initWithFrame: NSMakeRect(10, 50, 512, 342) title: @"AppKit on Classic!"];
@@ -75,6 +76,15 @@
 	while ((currKey = [enny nextObject])) {
 		NSLog(@"\t%@ = %@", currKey, [dict objectForKey: currKey]);
 	}
+	
+	arr = [NSMutableArray arrayWithObjects: @"E", @"A", @"C", @"B", nil];
+	NSLog(@"Array Contents: %@", [arr description]);
+	[arr sortUsingSelector: @selector(compare:)];
+	NSLog(@"Sorted Array Contents: %@", arr);
+	
+	NSLog(@"A == E: %d", [@"A" compare: @"E"]);
+	NSLog(@"A == A: %d", [@"A" compare: @"A"]);
+	NSLog(@"E == A: %d", [@"E" compare: @"A"]);
 }
 
 @end

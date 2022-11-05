@@ -66,6 +66,8 @@ extern struct objc_class **gClasses;
 +(Class) class;
 -(Class) class;
 
+-(BOOL) isKindOfClass: (Class)aClass;
+
 @end
 
 @protocol NSObject
@@ -84,6 +86,8 @@ extern struct objc_class **gClasses;
 -(BOOL) respondsToSelector: (SEL)aSelector;
 
 -(Class) class;
+
+-(BOOL) isKindOfClass: (Class)aClass;
 
 @end
 
@@ -114,6 +118,8 @@ extern void objc_registerClass(Class theClass);
 #if __cplusplus
 extern "C" {
 #endif
+
+extern IMP find_method_implementation(id receiver,SEL sel);
 
 //	runtime functions
 extern id objc_msgSend(id argself, SEL op, ...);

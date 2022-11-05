@@ -368,7 +368,7 @@ NSApplication* NSApp = nil;
 
 -(void) validateMenus: (NSMenu*)menu
 {
-	NSMutableArray * items;
+	NSArray * items;
 	unsigned x, count;
 	NSMenu * submenu;
 

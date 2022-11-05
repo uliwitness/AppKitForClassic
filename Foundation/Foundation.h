@@ -8,3 +8,6 @@
 #import "NSAutoreleasePool.h"
 #import "NSDictionary.h"
 #import "NSObjCRuntime.h"
+#import "NSCoder.h"
+#import "NSArchiver.h"
+#import "NSEnumerator.h"

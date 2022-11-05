@@ -2,6 +2,7 @@
 #include <Events.h>
 #include <limits.h>
 #import "NSArray.h"
+#import "NSString.h"
 
 #define MAX_TICKS_BETWEEN_EVENT_LOOPS	120
 

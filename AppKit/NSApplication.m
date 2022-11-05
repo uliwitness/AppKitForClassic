@@ -323,6 +323,9 @@ NSApplication* NSApp = nil;
 -(NSResponder*) firstResponder
 {
 	NSResponder *firstResponder = [[self mainWindow] firstResponder];
+	if (!firstResponder) {
+		firstResponder = [self mainWindow];
+	}
 	if( !firstResponder ) {
 		firstResponder = self;
 	}

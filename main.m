@@ -45,7 +45,6 @@
 	[innerView setAutoresizingMask: NSViewMinXMargin | NSViewMaxYMargin | NSViewMaxXMargin | NSViewMinYMargin | NSViewWidthSizable | NSViewHeightSizable];
 	[innerView addSubview: textView];
 	[textView addSubview: buttonView];
-	focused = [_mainWindow makeFirstResponder: textView];
 	[_mainWindow makeKeyAndOrderFront: self];
 	
 	_dlogWindow = [[NSWindow alloc] initWithDLOG: 128];

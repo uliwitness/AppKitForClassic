@@ -36,42 +36,50 @@
 
 -(void) drawRect: (NSRect)dirtyRect
 {
-	if (_macControl) {
-		Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
-		SetOrigin( 0, 0 );
-		MoveControl( _macControl, box.left, box.top );
-		SizeControl( _macControl, box.right - box.left, box.bottom - box.top );
-		Draw1Control( _macControl );
+	if (_style == NSProgressIndicatorSpinningStyle) {
+		short iconID = 7000 +((TickCount() / 12) % 8);
+		Rect spinnerBox = QDRectFromNSRect([self bounds]);
+		spinnerBox.right = spinnerBox.left + 16;
+		spinnerBox.bottom = spinnerBox.top + 16;
+		PlotIconID(&spinnerBox, atAbsoluteCenter, ttNone, iconID);
 	} else {
-		Rect trackBox = QDRectFromNSRect([self bounds]);
-		Rect filledBox;
-		RGBColor lightBlue = {0xCDCD, 0xCBCB, 0xFFFF};
-		RGBColor darkGray = {0x5555, 0x5555, 0x5555};
-		double percentage = _doubleValue - _minValue;
-		percentage /= _maxValue - _minValue;
-		
-		trackBox.bottom = trackBox.top + 14;
-		
-		filledBox = trackBox;
-		
-		if (!_indeterminate) {
-			RGBForeColor(&lightBlue);
-			PaintRect(&trackBox);
-
-			filledBox.right = trackBox.left +(((double) trackBox.right - trackBox.left) * percentage);
-			RGBForeColor(&darkGray);
-			PaintRect(&filledBox);
+		if (_macControl) {
+			Rect box = QDRectFromNSRect( [self convertRect: [self bounds] toView: nil] );
+			SetOrigin( 0, 0 );
+			MoveControl( _macControl, box.left, box.top );
+			SizeControl( _macControl, box.right - box.left, box.bottom - box.top );
+			Draw1Control( _macControl );
 		} else {
-			short patternID = 7000 +((TickCount() / 6) % 8);
-			PixPatHandle pattern = GetPixPat(patternID);
-			PenPixPat(pattern);
-			PaintRect(&trackBox);
-			PenPat(&qd.black);
-			DisposePixPat(pattern);
+			Rect trackBox = QDRectFromNSRect([self bounds]);
+			Rect filledBox;
+			RGBColor lightBlue = {0xCDCD, 0xCBCB, 0xFFFF};
+			RGBColor darkGray = {0x5555, 0x5555, 0x5555};
+			double percentage = _doubleValue - _minValue;
+			percentage /= _maxValue - _minValue;
+			
+			trackBox.bottom = trackBox.top + 14;
+			
+			filledBox = trackBox;
+			
+			if (!_indeterminate) {
+				RGBForeColor(&lightBlue);
+				PaintRect(&trackBox);
+
+				filledBox.right = trackBox.left +(((double) trackBox.right - trackBox.left) * percentage);
+				RGBForeColor(&darkGray);
+				PaintRect(&filledBox);
+			} else {
+				short patternID = 7000 +((TickCount() / 6) % 8);
+				PixPatHandle pattern = GetPixPat(patternID);
+				PenPixPat(pattern);
+				PaintRect(&trackBox);
+				PenPat(&qd.black);
+				DisposePixPat(pattern);
+			}
+			
+			ForeColor(blackColor);
+			FrameRect(&trackBox);
 		}
-		
-		ForeColor(blackColor);
-		FrameRect(&trackBox);
 	}
 }
 
@@ -147,6 +155,15 @@
 		SetControlValue(_macControl, (SInt16)maxVal);
 	}
 	[self setNeedsDisplay: YES];
+}
+
+-(void) setStyle: (NSProgressIndicatorStyle)style {
+	_style = style;
+	[self setNeedsDisplay: YES];
+}
+
+-(NSProgressIndicatorStyle) style {
+	return _style;
 }
 
 @end

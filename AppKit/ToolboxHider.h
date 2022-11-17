@@ -7,6 +7,8 @@
 #define inButton 10
 #define inCheckBox 11
 
+#define kControlChasingArrowsProc 112
+
 #define kControlPushButtonDefaultTag FOUR_CHAR_CODE('dflt') 
 #define kControlProgressBarIndeterminateTag FOUR_CHAR_CODE('inde')
 

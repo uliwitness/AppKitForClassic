@@ -223,11 +223,21 @@ NSView* gCurrentMouseView = nil;
 					[cntlStream release];
 					
 					switch (cdefID) {
-						case 80: { // progress bar.
+						case kControlProgressBarProc: { // progress bar.
 							NSProgressIndicator *pv = [[NSProgressIndicator alloc] initWithFrame: nsItemBox];
 							[pv setDoubleValue: currVal];
 							[pv setMinValue: min];
 							[pv setMaxValue: max];
+							[self addSubview: pv];
+							[pv release];
+							break;
+						}
+						case kControlChasingArrowsProc: { // tiny indeterminate progress "spinner".
+							NSProgressIndicator *pv = [[NSProgressIndicator alloc] initWithFrame: nsItemBox];
+							[pv setDoubleValue: currVal];
+							[pv setMinValue: min];
+							[pv setMaxValue: max];
+							[pv setStyle: NSProgressIndicatorSpinningStyle];
 							[self addSubview: pv];
 							[pv release];
 							break;

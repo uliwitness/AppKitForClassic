@@ -19,6 +19,7 @@
 -(unsigned) count;
 -(id) objectAtIndex: (unsigned)idx; // returns NIL if index out of range.
 -(unsigned) indexOfObjectIdenticalTo: (id)obj;
+-(unsigned) indexOfObject: (id)obj;
 
 -(NSEnumerator*) objectEnumerator;
 

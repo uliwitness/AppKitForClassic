@@ -12,6 +12,7 @@
 #define TAB_H_INNER_PADDING 	12
 #define TAB_V_INNER_PADDING 	3
 #define CONTENT_INNER_PADDING	4
+#define ICON_TITLE_H_SPACING	4
 
 @interface NSTabContentView : NSView
 {
@@ -35,6 +36,7 @@
 	[_label release];
 	[_identifier release];
 	[_view release];
+	[_image release];
 	
 	[super dealloc];
 }
@@ -68,6 +70,16 @@
 
 -(NSView*) view {
 	return _view;
+}
+
+-(void) setImage: (NSImage*)img {
+	NSImage *oldView = _image;
+	_image = [img retain];
+	[oldView release];
+}
+
+-(NSImage*) image {
+	return _image;
 }
 
 -(void) setTabBox: (NSRect)box {
@@ -159,6 +171,9 @@ static void DrawTab(Rect *currentTab) {
 	for (x = 0; x < count; ++x) {
 		NSTabViewItem * currentItem = [_tabViewItems objectAtIndex: x];
 		Str255 tabLabel = {0};
+		if ([currentItem image] != nil) {
+			currentTab.right += 16 + ICON_TITLE_H_SPACING;
+		}
 		[[currentItem label] getStr255: tabLabel];
 		currentTab.right += StringWidth(tabLabel);
 		currentTab.right += TAB_H_INNER_PADDING * 2;
@@ -194,6 +209,8 @@ static void DrawTab(Rect *currentTab) {
 	[NSBezierPath strokeRect: contentArea];
 	
 	for (x = 0; x < count; ++x) {
+		short tabLabelLeft = 0;
+		NSImage *img = nil;
 		PolyHandle tabBody = NULL;
 		NSTabViewItem * currentItem = [_tabViewItems objectAtIndex: x];
 		Rect currentTab = QDRectFromNSRect([currentItem tabBox]);
@@ -218,12 +235,24 @@ static void DrawTab(Rect *currentTab) {
 		}
 		DrawTab(&currentTab);
 		
+		tabLabelLeft = currentTab.left + TAB_H_INNER_PADDING;
+		img = [currentItem image];
+		if (img) {
+			NSRect tabBox = [currentItem tabBox];
+			NSRect iconBox = tabBox;
+			iconBox.origin.x = tabLabelLeft;
+			iconBox.origin.y += (tabBox.size.height - 16) / 2;
+			iconBox.size = NSMakeSize(16, 16);
+			[img drawInRect: iconBox];
+			tabLabelLeft += 16 + ICON_TITLE_H_SPACING;
+		}
+		
 		if (_selectedTabViewItem == currentItem) {
 			[[NSColor blackColor] setStroke];
 		} else {
 			[[NSColor darkGrayColor] setStroke];
 		}
-		MoveTo(currentTab.left + TAB_H_INNER_PADDING, currentTab.bottom - TAB_V_INNER_PADDING - fontInfo.descent);
+		MoveTo(tabLabelLeft, currentTab.bottom - TAB_V_INNER_PADDING - fontInfo.descent);
 		DrawString(tabLabel);
 		
 		if (_selectedTabViewItem == currentItem) {

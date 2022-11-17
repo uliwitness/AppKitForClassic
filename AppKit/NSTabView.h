@@ -1,6 +1,7 @@
 #import "NSMiniRuntime.h"
 #import "NSView.h"
 #import "NSArray.h"
+#import "NSImage.h"
 
 @class NSTabView;
 @class NSTabViewItem;
@@ -15,6 +16,7 @@
 {
 	NSString *_label;
 	NSString *_identifier;
+	NSImage *_image;
 	NSView *_view;
 	NSRect _tabBox;
 }
@@ -27,6 +29,9 @@
 
 -(void) setView: (NSView*)view;
 -(NSView*) view;
+
+-(void) setImage: (NSImage*)img;
+-(NSImage*) image;
 
 // Private:
 -(void) setTabBox: (NSRect)box;

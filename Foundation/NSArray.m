@@ -122,6 +122,16 @@
 	return NSNotFound;
 }
 
+-(unsigned) indexOfObject: (id)obj {
+	unsigned x;
+	for( x = 0; x < _count; ++x ) {
+		if([obj isEqual: _storage[x]]) {
+			return x;
+		}
+	}
+	return NSNotFound;
+}
+
 -(NSEnumerator*) objectEnumerator {
 	return [[[NSArrayEnumerator alloc] initWithArray: self] autorelease];
 }

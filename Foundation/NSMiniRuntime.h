@@ -28,11 +28,12 @@ extern struct objc_class **gClasses;
 #define ISA_FOR_INDEX_AND_REFCOUNT(idx, rc)	((void*)(kRetainCountInISABit | (((unsigned long)idx) << kClassIndexShift) | (((unsigned long)rc) << kRetainCountShift)))
 #define ISA_TO_PTR(isa) ((((unsigned long)(isa)) & kRetainCountInISABit) ? gClasses[CLASS_INDEX_FROM_ISA(isa)] : (isa))
 
-// Standard functions:
-#define NSSelectorFromString(objCStr) ((SEL)[objCStr cString])
-
-
 @class NSString;
+
+
+// Standard functions:
+SEL NSSelectorFromString(NSString *str);
+
 
 // Base class is also used for constant strings etc. for which MWObjC assumes a fixed layout with
 // only an isa at the start, but we want it to implement no-ops for retain and release so we can

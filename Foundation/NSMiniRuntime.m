@@ -43,22 +43,18 @@ unsigned short index_for_class(Class c) {
 
 IMP find_method_implementation(id receiver,SEL sel)
 {
-	if(receiver!=nil)
-	{
+	if(receiver != nil) {
 		Class		isa;
 		const char	*selector_name;
 
-		selector_name=(const char *)sel;
-		for(isa=ISA_TO_PTR(receiver->isa); isa; isa=isa->super_class)
-		{
+		selector_name = (const char *)sel;
+		for(isa = ISA_TO_PTR(receiver->isa); isa; isa = isa->super_class) {
 			objc_method_list	*mlist;
-			int					i,n;
-			if((mlist=isa->methodlist)!=NULL)
-			{
-				for(i=0,n=mlist->method_count; i<n; i++)
-				{
-					if(strcmp(selector_name,mlist->method_list[i].method_name)==0)
-					{
+			int					i, n;
+			if((mlist = isa->methodlist) != NULL) {
+				for(i = 0, n = mlist->method_count; i < n; ++i) {
+					if(selector_name == mlist->method_list[i].method_name
+						|| strcmp(selector_name,mlist->method_list[i].method_name) == 0) {
 						return mlist->method_list[i].method_imp;
 					}
 				}
@@ -101,6 +97,24 @@ static IMP find_super_implementation(objc_super *argsuper,SEL sel)
 		}
 	}
 	return NULL;
+}
+
+static NSMutableArray *sRegisteredSelectors = nil;
+
+// Keep around one unique NSString for each SEL, to ensure the SELs passed around
+// do not disappear.
+SEL NSSelectorFromString(NSString *str) {
+	unsigned foundIndex = NSNotFound;
+	if (!sRegisteredSelectors) {
+		sRegisteredSelectors = [[NSMutableArray alloc] init];
+	}
+	foundIndex = [sRegisteredSelectors indexOfObject: str];
+	if (foundIndex == NSNotFound) {
+		[sRegisteredSelectors addObject: str];
+	} else {
+		str = [sRegisteredSelectors objectAtIndex: foundIndex];
+	}
+	return (SEL)[str cString];
 }
 
 

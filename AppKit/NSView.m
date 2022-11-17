@@ -156,6 +156,7 @@ NSView* gCurrentMouseView = nil;
 		Str255	itemText = {0};
 		NSRect	nsItemBox = {0};
 		NSString * text = nil;
+		NSArray * parameters = nil;
 		Boolean isEnabled = false;
 		
 		[stream skip: sizeof(UInt32)];
@@ -167,6 +168,10 @@ NSView* gCurrentMouseView = nil;
 		[stream alignOn: 2];
 		nsItemBox = NSRectFromQDRect(itemBox);
 		text = [[NSString alloc] initWithStr255: itemText];
+		parameters = [text componentsSeparatedByString: @"\\\\"];
+		if ([parameters count] > 1) {
+			text = [parameters objectAtIndex: 0];
+		}
 		
 		switch (itemType) {
 			case 4: {
@@ -178,6 +183,9 @@ NSView* gCurrentMouseView = nil;
 				[bt setTitle: text];
 				if (isDefault) {
 					[bt setKeyEquivalent: @"\r"];
+				}
+				if ([parameters count] > 1) {
+					[bt setAction: NSSelectorFromString([parameters objectAtIndex: 1])];
 				}
 				[self addSubview: bt];
 				[bt release];
@@ -242,14 +250,14 @@ NSView* gCurrentMouseView = nil;
 							[pv release];
 							break;
 						}
-						case 128:
-						case 129:
-						case 130:
-						case 131:
-						case 132:
-						case 133:
-						case 134:
-						case 135: { // tab control.
+						case kControlTabLargeNorthProc:
+						case kControlTabSmallNorthProc:
+						case kControlTabLargeSouthProc:
+						case kControlTabSmallSouthProc:
+						case kControlTabLargeEastProc:
+						case kControlTabSmallEastProc:
+						case kControlTabLargeWestProc:
+						case kControlTabSmallWestProc: { // tab control.
 							NSTabView *tc = nil;
 							short numTabs = 0, x = 0;
 							Str255 tabName;
@@ -260,12 +268,17 @@ NSView* gCurrentMouseView = nil;
 							for (x = 0; x < numTabs; ++x) {
 								NSString *tabNameObject = nil;
 								NSTabViewItem * item = [[NSTabViewItem alloc] init];
-								[tabStream skip: 2]; // Icon ID
+								short iconID = [tabStream readSInt16];
 								[tabStream readStr255: tabName];
 								[tabStream skip: 4];
 								[tabStream skip: 2];
 								tabNameObject = [[NSString alloc] initWithStr255: tabName];
 								[item setLabel: tabNameObject];
+								if (iconID != 0) {
+									NSImage * img = [[NSImage alloc] initWithIconFamilyResource: iconID];
+									[item setImage: img];
+									[img release];
+								}
 								[tc addTabViewItem: item];
 								[tabNameObject release];
 								[item release];

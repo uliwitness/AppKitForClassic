@@ -9,6 +9,17 @@
 
 #define kControlChasingArrowsProc 112
 
+#define kControlTabLargeProc           128
+#define kControlTabSmallProc           129
+#define kControlTabLargeNorthProc      128
+#define kControlTabSmallNorthProc      129
+#define kControlTabLargeSouthProc      130
+#define kControlTabSmallSouthProc      131
+#define kControlTabLargeEastProc       132
+#define kControlTabSmallEastProc       133
+#define kControlTabLargeWestProc       134
+#define kControlTabSmallWestProc	   135
+
 #define kControlPushButtonDefaultTag FOUR_CHAR_CODE('dflt') 
 #define kControlProgressBarIndeterminateTag FOUR_CHAR_CODE('inde')
 
